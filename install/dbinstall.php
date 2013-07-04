@@ -107,10 +107,7 @@ foreach($tabledate as $tblname => $tbldef)
 			$drop = check_indexes($index, $structure['indexes'], $pref . $tblname);
 
 		if(empty($drop))
-		{
 			_dbinst_write('.. Table successful checked.<br />');
-			$created[] = $tblname;
-		}
 	}
 
 	if(!empty($drop))
@@ -215,7 +212,7 @@ if(!empty($dbupdates))
 		ORDER BY id_install DESC
 		LIMIT 1',
 		array(
-			'pkgid' => 'portamx_corp:SubForums',
+			'pkgid' => 'portamx_corp:SubForums%',
 			'vers' => '1.%',
 		)
 	);
