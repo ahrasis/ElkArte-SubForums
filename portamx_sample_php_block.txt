@@ -1,0 +1,68 @@
+/**
+ * Sample to switch between SubForums
+ * Code for a PortaMx special PHP block
+ * [ SHOW PART ]
+**/
+global $base_boardurl, $settings;
+
+$base = parse_url($base_boardurl);
+foreach($this->php_content as $name => $desc)
+{
+	if($_SERVER['SERVER_NAME'] == $name)
+		echo '
+	<div>
+		<img src="'. $settings['default_theme_url'] .'/PortaMx/SysCss/Images/bullet_red.gif" alt="*" title="Click to exit this SunForum" hspace="2" />
+		<a href="javascript:void(\'\')" onclick="SFSetHost(\''. $base['host'] .'\')"><b>'. $desc .'</b></a>
+	</div>';
+	else
+		echo '
+	<div>
+		<img src="'. $settings['default_theme_url'] .'/PortaMx/SysCss/Images/bullet_go.gif" alt="*" />
+		<a href="javascript:void(\'\')" onclick="SFSetHost(\''. $name .'\')">'. $desc .'</a>
+	</div>';
+}
+/**
+ * END SHOW PART
+**/
+
+=====[ COPY UPPER PART IN THE FIRST EDITOR, LOWER PART IN THE SECOND EDITOR ]=====
+
+/**
+ * Sample to switch between SubForums
+ * Code for a PortaMx special PHP block
+ * [ INIT PART ]
+**/
+global $smcFunc, $mbname, $base_boardurl, $context;
+
+if(isset($base_boardurl))
+{
+	$context['html_headers'] .= '
+	<script language="JavaScript" type="text/javascript">
+	function SFSetHost(host) {
+		var oldhost = window.location.hostname;
+		window.location.href = window.location.href.replace(oldhost, host); }
+	</script>';
+
+	$this->php_content = array();
+	$request = $smcFunc['db_query']('', '
+		SELECT forum_host, forum_name
+		FROM {db_prefix}subforums
+		ORDER BY id',
+		array()
+	);
+	if($smcFunc['db_num_rows']($request) > 0)
+	{
+		$base = parse_url($base_boardurl);
+		$this->php_content[$base['host']] = $mbname;
+		while($row = $smcFunc['db_fetch_assoc']($request))
+			$this->php_content[$row['forum_host']] = empty($row['forum_name']) ? $mbname : $row['forum_name'];
+		$smcFunc['db_free_result']($request);
+	}
+	else
+		$this->visible = false;
+}
+else
+	$this->visible = false;
+/**
+ * END INIT PART
+**/

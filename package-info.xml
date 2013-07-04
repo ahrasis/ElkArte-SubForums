@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>portamx_corp:SubForums</id>
+	<name>PMx-SubForums</name>
+	<version>1.41</version>
+	<type>modification</type>
+
+	<install for="2.0.*">
+		<readme type="file" parsebbc="true">readme.bbc</readme>
+		<database type="file">install/dbinstall.php</database>
+		<modification format="xml" type="file">install/subforuminst.xml</modification>
+
+		<require-dir name="Sources/SubForums" destination="$sourcedir" />
+		<require-dir name="Themes/default/SubForums" destination="$themedir" />
+		<require-dir name="Themes/default/languages/SubForums" destination="$languagedir" />
+		<require-file name="admin_images/subforums.gif" destination="$imagesdir/admin" />
+		<redirect url="$scripturl?action=admin;area=subforums" timeout="15000">installdone.html</redirect>
+	</install>
+
+	<uninstall for="2.0.*">
+		<readme type="file" parsebbc="true">remove.bbc</readme>
+		<code type="file">removehook.php</code>
+		<modification reverse="true">install/subforuminst.xml</modification>
+
+		<remove-dir name="$sourcedir/SubForums" />
+		<remove-dir name="$themedir/SubForums" />
+		<remove-dir name="$languagedir/SubForums" />
+		<remove-file name="$imagesdir/admin/subforums.gif" />
+		<redirect url="$scripturl" timeout="15000">removedone.html</redirect>
+	</uninstall>
+</package-info>
