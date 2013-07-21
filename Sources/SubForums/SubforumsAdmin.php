@@ -278,8 +278,8 @@ function SubforumsAdmin()
 		$context['subforums']['languages'] = getLanguages();
 
 		// load template
-		loadTemplate('Subforums/Subforums');
-		loadLanguage('Subforums/Subforums');
+		loadTemplate('SubForums/Subforums');
+		loadLanguage('SubForums/Subforums');
 
 		// setup pagetitle
 		$context['page_title'] = $txt['admin_subforums_title'];
