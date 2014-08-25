@@ -301,10 +301,10 @@ function Subforums_checkhost($itemData, &$bits)
 			{
 				// found it..
 				$found = true;
-				if((is_null($state) || (empty($bits['action']) && !empty($state))))
-					$bits['action'] = intval(empty($isNot));
-				elseif(!empty($isNot))
+				if(!empty($isNot))
 					$bits = pmx_setBits(0);
+				elseif((is_null($state) || (empty($bits['action']) && !empty($state))))
+					$bits['action'] = intval(empty($isNot));
 				break;
 			}
 		}
