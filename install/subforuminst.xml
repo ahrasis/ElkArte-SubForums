@@ -1,13 +1,25 @@
 <?xml version="1.0"?>
-<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
-<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
-<id>portamx_corp:SubForums</id>
-<version>1.41</version>
+<!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
+<modification xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
+	<license><![CDATA[
+/**
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
+]]></license>
 
-<file name="$boarddir/index.php">
+<file name="BOARDDIR/index.php">
 	<operation>
 		<search position="after"><![CDATA[
-		// Log this user as online.
+		// I see you!
 		writeLog();
 ]]></search>
 		<add><![CDATA[
@@ -18,7 +30,7 @@
 </file>
 
 
-<file name="$sourcedir/Load.php">
+<file name="SOURCEDIR/Load.php">
 	<operation>
 		<search position="before"><![CDATA[
 	}
@@ -63,16 +75,16 @@
 	</operation>
 </file>
 
-<file name="$sourcedir/LogInOut.php">
+<file name="CONTROLLERDIR/Auth.controller.php">
 	<operation>
 		<search position="replace"><![CDATA[
-		$context['login_errors'] = array($txt['no_password']);
-		return;
+			$context['login_errors'] = array($txt['no_password']);
+			return;
 ]]></search>
 		<add><![CDATA[
-		$_SESSION['subforums_failed_login'] = true;
-		$context['login_errors'] = array($txt['no_password']);
-		return;
+			$_SESSION['subforums_failed_login'] = true;
+			$context['login_errors'] = array($txt['no_password']);
+			return;
 ]]></add>
 	</operation>
 
@@ -102,93 +114,88 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-			validatePasswordFlood($user_settings['id_member'], $user_settings['passwd_flood']);
+				validatePasswordFlood($user_settings['id_member'], $user_settings['passwd_flood']);
 
-			$_SESSION['failed_login'] = @$_SESSION['failed_login'] + 1;
+				$_SESSION['failed_login'] = isset($_SESSION['failed_login']) ? ($_SESSION['failed_login'] + 1) : 1;
 ]]></search>
 		<add><![CDATA[
-			validatePasswordFlood($user_settings['id_member'], $user_settings['passwd_flood']);
+				validatePasswordFlood($user_settings['id_member'], $user_settings['passwd_flood']);
 
-			$_SESSION['failed_login'] = @$_SESSION['failed_login'] + 1;
-			$_SESSION['subforums_failed_login'] = true;
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-				$context['disable_login_hashing'] = true;
-				$context['login_errors'] = array($txt['incorrect_password']);
-]]></search>
-		<add><![CDATA[
+				$_SESSION['failed_login'] = isset($_SESSION['failed_login']) ? ($_SESSION['failed_login'] + 1) : 1;
 				$_SESSION['subforums_failed_login'] = true;
-				$context['disable_login_hashing'] = true;
-				$context['login_errors'] = array($txt['incorrect_password']);
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-			// They've messed up again - keep a count to see if they need a hand.
-			$_SESSION['failed_login'] = @$_SESSION['failed_login'] + 1;
+					$context['disable_login_hashing'] = true;
+					$context['login_errors'] = array($txt['incorrect_password']);
 ]]></search>
 		<add><![CDATA[
-			// They've messed up again - keep a count to see if they need a hand.
-			$_SESSION['failed_login'] = @$_SESSION['failed_login'] + 1;
-			$_SESSION['subforums_failed_login'] = true;
+					$_SESSION['subforums_failed_login'] = true;
+					$context['disable_login_hashing'] = true;
+					$context['login_errors'] = array($txt['incorrect_password']);
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-				// Log an error so we know that it didn't go well in the error log.
-				log_error($txt['incorrect_password'] . ' - <span class="remove">' . $user_settings['member_name'] . '</span>', 'user');
+				// They've messed up again - keep a count to see if they need a hand.
+				$_SESSION['failed_login'] = isset($_SESSION['failed_login']) ? ($_SESSION['failed_login'] + 1) : 1;
 ]]></search>
 		<add><![CDATA[
-				// Log an error so we know that it didn't go well in the error log.
-				log_error($txt['incorrect_password'] . ' - <span class="remove">' . $user_settings['member_name'] . '</span>', 'user');
+				// They've messed up again - keep a count to see if they need a hand.
+				$_SESSION['failed_login'] = isset($_SESSION['failed_login']) ? ($_SESSION['failed_login'] + 1) : 1;
 				$_SESSION['subforums_failed_login'] = true;
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+					// Log an error so we know that it didn't go well in the error log.
+					log_error($txt['incorrect_password'] . ' - <span class="remove">' . $user_settings['member_name'] . '</span>', 'user');
+]]></search>
+		<add><![CDATA[
+					// Log an error so we know that it didn't go well in the error log.
+					log_error($txt['incorrect_password'] . ' - <span class="remove">' . $user_settings['member_name'] . '</span>', 'user');
+					$_SESSION['subforums_failed_login'] = true;
 ]]></add>
 	</operation>
 </file>
 
 
-<file name="$sourcedir/News.php">
+<file name="CONTROLLERDIR/News.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
-	$_GET['limit'] = empty($_GET['limit']) || (int) $_GET['limit'] < 1 ? 5 : min((int) $_GET['limit'], 255);
+		$limit = empty($modSettings['xmlnews_limit']) ? 5 : min($modSettings['xmlnews_limit'], 255);
+		$this->_limit = empty($_GET['limit']) || (int) $_GET['limit'] < 1 ? $limit : min((int) $_GET['limit'], $limit);
 ]]></search>
 		<add><![CDATA[
-	$feed_titleurl = SubforumsAllocator('getMemberurl', $scripturl);
+		$feed_titleurl = SubforumsAllocator('getMemberurl', $scripturl);
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-			list ($feed_title) = $smcFunc['db_fetch_row']($request);
-			$smcFunc['db_free_result']($request);
-
-			$feed_title = ' - ' . strip_tags($feed_title);
+				$feed_title = ' - ' . strip_tags($feed_title);
 ]]></search>
 		<add><![CDATA[
-			list ($feed_title) = $smcFunc['db_fetch_row']($request);
-			$smcFunc['db_free_result']($request);
-
-			$feed_titleurl = SubforumsAllocator('getScripturl', array('cats', $_REQUEST['c'][0], $scripturl));
-			$feed_title = ' - ' . strip_tags($feed_title);
+				$feed_titleurl = SubforumsAllocator('getScripturl', array('cats', $_REQUEST['c'][0], $scripturl));
+				$feed_title = ' - ' . strip_tags($feed_title);
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-			if ($num_boards == 1)
-				$feed_title = ' - ' . strip_tags($row['name']);
+				if ($num_boards == 1)
+					$feed_title = ' - ' . strip_tags($row['name']);
 ]]></search>
 		<add><![CDATA[
-			if ($num_boards == 1)
-			{
-				$feed_title = ' - ' . strip_tags($row['name']);
-				$feed_titleurl = SubforumsAllocator('getScripturl', array('boards', $row['id_board'], $scripturl));
-			}
+				if ($num_boards == 1)
+				{
+					$feed_title = ' - ' . strip_tags($row['name']);
+					$feed_titleurl = SubforumsAllocator('getScripturl', array('boards', $row['id_board'], $scripturl));
+				}
 ]]></add>
 	</operation>
 
@@ -227,188 +234,173 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$smcFunc['db_free_result']($request);
+			$feed_title = ' - ' . strip_tags($board_info['name']);
 
-		$feed_title = ' - ' . strip_tags($board_info['name']);
-
-		$query_this_board = 'b.id_board = ' . $board;
+			$this->_query_this_board = 'b.id_board = ' . $board;
 ]]></search>
 		<add><![CDATA[
-		$feed_title = ' - ' . strip_tags($board_info['name']);
-		$feed_titleurl = SubforumsAllocator('getScripturl', array('boards', $board, $scripturl));
+			$feed_title = ' - ' . strip_tags($board_info['name']);
+			$feed_titleurl = SubforumsAllocator('getScripturl', array('boards', $board, $scripturl));
 
-		$query_this_board = 'b.id_board = ' . $board;
+			$this->_query_this_board = 'b.id_board = ' . $board;
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-	if (!allowedTo('view_mlist'))
-		return array();
+		if (!allowedTo('view_mlist'))
+			return array();
 ]]></search>
 		<add><![CDATA[
-	if (!allowedTo('view_mlist'))
-		return array();
+		if (!allowedTo('view_mlist'))
+			return array();
 
-	$url = SubforumsAllocator('getMemberurl', $scripturl);
-	if(empty($url))
-		return array();
+		$url = SubforumsAllocator('getMemberurl', $scripturl);
+		if(empty($url))
+			return array();
 
-	$base_scripturl = $scripturl;
-	$scripturl = $url;
+		$base_scripturl = $scripturl;
+		$scripturl = $url;
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-				'link' => $scripturl . '?action=profile;u=' . $row['id_member']
-			);
-	}
-	$smcFunc['db_free_result']($request);
-
-	return $data;
-}
-]]></search>
-		<add><![CDATA[
-				'link' => $scripturl . '?action=profile;u=' . $row['id_member']
-			);
-	}
-	$smcFunc['db_free_result']($request);
-	$scripturl = $base_scripturl;
-
-	return $data;
-}
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-		else
-			$done = true;
-	}
-	$data = array();
-	while ($row = $smcFunc['db_fetch_assoc']($request))
-	{
-]]></search>
-		<add><![CDATA[
-		else
-			$done = true;
-	}
-	$data = array();
-	$base_scripturl = $scripturl;
-	while ($row = $smcFunc['db_fetch_assoc']($request))
-	{
-		$newurl = SubforumsAllocator('getScripturl', array('boards', $row['id_board'], $base_scripturl));
-		if(!empty($newurl))
-		{
-			$scripturl = $newurl;
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-					'link' => $scripturl . '?board=' . $row['id_board'] . '.0',
-				),
-				'link' => $scripturl . '?topic=' . $row['id_topic'] . '.0',
-			);
-	}
-	$smcFunc['db_free_result']($request);
-]]></search>
-		<add><![CDATA[
-					'link' => $scripturl . '?board=' . $row['id_board'] . '.0',
-				),
-				'link' => $scripturl . '?topic=' . $row['id_topic'] . '.0',
-			);
+					'link' => $scripturl . '?action=profile;u=' . $member['id_member']
+				);
 		}
-	}
-	$smcFunc['db_free_result']($request);
-	$scripturl = $base_scripturl;
-]]></add>
-	</operation>
 
-	<operation>
-		<search position="replace"><![CDATA[
-			'message_list' => $messages,
-		)
-	);
-	$data = array();
-	while ($row = $smcFunc['db_fetch_assoc']($request))
-	{
+		return $data;
+	}
 ]]></search>
 		<add><![CDATA[
-			'message_list' => $messages,
-		)
-	);
-	$base_scripturl = $scripturl;
-	$data = array();
-	while ($row = $smcFunc['db_fetch_assoc']($request))
-	{
-		$newurl = SubforumsAllocator('getScripturl', array('boards', $row['id_board'], $base_scripturl));
-		if(!empty($newurl))
-		{
-			$scripturl = $newurl;
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-				),
-				'link' => $scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg']
-			);
-	}
-	$smcFunc['db_free_result']($request);
-]]></search>
-		<add><![CDATA[
-				),
-				'link' => $scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg']
-			);
+					'link' => $scripturl . '?action=profile;u=' . $member['id_member']
+				);
 		}
+		$db->free_result($result);
+		
+		return $data;
 	}
-	$smcFunc['db_free_result']($request);
-	$scripturl = $base_scripturl;
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+		// Prepare it for the feed in the format chosen (rss, atom, etc)
+		$data = array();
+		foreach ($results as $row)
+		{
+]]></search>
+		<add><![CDATA[
+		// Prepare it for the feed in the format chosen (rss, atom, etc)
+		$base_scripturl = $scripturl;
+		$data = array();
+		foreach ($results as $row)
+		{
+			$newurl = SubforumsAllocator('getScripturl', array('boards', $row['id_board'], $base_scripturl));
+			if(!empty($newurl))
+			{
+				$scripturl = $newurl;
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+						'link' => $scripturl . '?board=' . $row['id_board'] . '.0',
+					),
+					'link' => $scripturl . '?topic=' . $row['id_topic'] . '.0',
+				);
+			}
+		}
+]]></search>
+		<add><![CDATA[
+						'link' => $scripturl . '?board=' . $row['id_board'] . '.0',
+					),
+					'link' => $scripturl . '?topic=' . $row['id_topic'] . '.0',
+				);
+			}
+		}
+		$scripturl = $base_scripturl;
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+		// Loop on the results and prepare them in the format requested
+		$data = array();
+		foreach ($results as $row)
+		{
+]]></search>
+		<add><![CDATA[
+		// Loop on the results and prepare them in the format requested
+		$base_scripturl = $scripturl;
+		$data = array();
+		foreach ($results as $row)
+		{
+			$newurl = SubforumsAllocator('getScripturl', array('boards', $row['id_board'], $base_scripturl));
+			if(!empty($newurl))
+			{
+				$scripturl = $newurl;
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+					'link' => $scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg']
+				);
+			}
+		}
+]]></search>
+		<add><![CDATA[
+					'link' => $scripturl . '?topic=' . $row['id_topic'] . '.msg' . $row['id_msg'] . '#msg' . $row['id_msg']
+				);
+			}
+		}
+		$scripturl = $base_scripturl;
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="before"><![CDATA[
-	if (!loadMemberContext($_GET['u']) || !allowedTo('profile_view_any'))
-		return array();
+		// Load the member's contextual information!
+		if (!loadMemberContext($uid) || !allowedTo('profile_view_any'))
+			return array();
 ]]></search>
 		<add><![CDATA[
-	$url = SubforumsAllocator('getMemberurl', $scripturl);
-	if(empty($url))
-		return array();
+		$url = SubforumsAllocator('getMemberurl', $scripturl);
+		if(empty($url))
+			return array();
 
-	$base_scripturl = $scripturl;
-	$scripturl = $url;
+		$base_scripturl = $scripturl;
+		$scripturl = $url;
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-	// Save some memory.
-	unset($profile, $memberContext[$_GET['u']]);
+		// Save some memory.
+		unset($profile, $memberContext[$uid]);
 
-	return $data;
-}
+		return $data;
+	}
 ]]></search>
 		<add><![CDATA[
-	// Save some memory.
-	unset($profile, $memberContext[$_GET['u']]);
-	$scripturl = $base_scripturl;
+		// Save some memory.
+		unset($profile, $memberContext[$uid]);
+		$scripturl = $base_scripturl;
 
-	return $data;
-}
+		return $data;
+	}
 ]]></add>
 	</operation>
 </file>
 
 
-<file name="$sourcedir/Profile-View.php">
+<file name="CONTROLLERDIR/ProfileInfo.controller.php">
 	<operation>
 		<search position="replace"><![CDATA[
 	if ($context['is_topics'])
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT COUNT(*)
 			FROM {db_prefix}topics AS t' . ($user_info['query_see_board'] == '1=1' ? '' : '
 				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})') . '
@@ -417,7 +409,7 @@
 		<add><![CDATA[
 	// SubForums
 	if ($context['is_topics'])
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT COUNT(*)
 			FROM {db_prefix}topics AS t' . ($user_info['query_see_board'] == '1=1' ? '' : '
 				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})') . '
@@ -427,7 +419,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT COUNT(*)
 			FROM {db_prefix}messages AS m' . ($user_info['query_see_board'] == '1=1' ? '' : '
 				INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board AND {query_see_board})') . '
@@ -435,7 +427,7 @@
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT COUNT(*)
 			FROM {db_prefix}messages AS m' . ($user_info['query_see_board'] == '1=1' ? '' : '
 				INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board AND {query_see_board})') . '
@@ -445,14 +437,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$request = $smcFunc['db_query']('', '
+	$request = $db->query('', '
 		SELECT MIN(id_msg), MAX(id_msg)
 		FROM {db_prefix}messages AS m
 		WHERE m.id_member = {int:current_member}' . (!empty($board) ? '
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$request = $smcFunc['db_query']('', '
+	$request = $db->query('', '
 		SELECT MIN(id_msg), MAX(id_msg)
 		FROM {db_prefix}messages AS m
 		WHERE m.id_member = {int:current_member}{subforums_see_board:m-id_board}' . (!empty($board) ? '
@@ -468,14 +460,14 @@
 	// SubForums
 	if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
 	{
-		$result = $smcFunc['db_query']('', '
+		$result = $db->query('', '
 			SELECT COUNT(id_msg)
 			FROM {db_prefix}messages
 			WHERE id_member = {int:id_mem}{subforums_see_board:id_board}',
 			array('id_mem' => $memID)
 		);
-		list($tmp) = $smcFunc['db_fetch_row']($result);
-		$smcFunc['db_free_result']($result);
+		list($tmp) = $db->fetch_row($result);
+		$db->free_result($request);
 		$context['num_posts'] = comma_format($tmp);
 	}
 ]]></add>
@@ -483,7 +475,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}topics
 		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -491,7 +483,7 @@
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}topics
 		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -501,7 +493,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}topics
 		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -510,7 +502,7 @@
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}topics
 		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -521,14 +513,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $smcFunc['db_query']('distinct_poll_votes', '
+	$result = $db->query('distinct_poll_votes', '
 		SELECT COUNT(DISTINCT id_poll)
 		FROM {db_prefix}log_polls
 		WHERE id_member = {int:current_member}',
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$result = $smcFunc['db_query']('distinct_poll_votes', '
+	$result = $db->query('distinct_poll_votes', '
 		SELECT COUNT(DISTINCT p.id_poll)
 		FROM {db_prefix}log_polls AS p
 			LEFT JOIN {db_prefix}topics as t ON (p.id_poll = t.id_poll)
@@ -538,7 +530,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $smcFunc['db_query']('user_activity_by_time', '
+	$result = $db->query('user_activity_by_time', '
 		SELECT
 			HOUR(FROM_UNIXTIME(poster_time + {int:time_offset})) AS hour,
 			COUNT(*) AS post_count
@@ -548,7 +540,7 @@
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$result = $smcFunc['db_query']('user_activity_by_time', '
+	$result = $db->query('user_activity_by_time', '
 		SELECT
 			HOUR(FROM_UNIXTIME(poster_time + {int:time_offset})) AS hour,
 			COUNT(*) AS post_count
@@ -560,7 +552,7 @@
 </file>
 
 
-<file name="$sourcedir/Recent.php">
+<file name="CONTROLLERDIR/Recent.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
 			$query_parameters['max_id_msg'] = max(0, $modSettings['maxMsgID'] - 600 - $_REQUEST['start'] * 10);
@@ -575,14 +567,14 @@
 		// SubForums
 		if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
 		{
-			$request = $smcFunc['db_query']('', '
+			$request = $db->query('', '
 				SELECT IFNULL(COUNT(id_msg),0), IFNULL(SUM(id_msg),0)
 				FROM {db_prefix}messages
 				WHERE 1=1{subforums_see_board:id_board}',
 				array()
 			);
-			list($recent_total_posts, $recent_maxMsgID) = $smcFunc['db_fetch_row']($request);
-			$smcFunc['db_free_result']($request);
+			list($recent_total_posts, $recent_maxMsgID) = $db->fetch_row($request);
+			$db->free_result($result);
 			if(!empty($recent_total_posts))
 				$recent_maxMsgID = intval($recent_maxMsgID / $recent_total_posts);
 		}
@@ -614,14 +606,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT b.id_board
 			FROM {db_prefix}boards AS b
 			WHERE ' . $user_info[$see_board] . '
 ]]></search>
 		<add><![CDATA[
 		// SubForums
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT b.id_board
 			FROM {db_prefix}boards AS b
 			WHERE {' . $see_board . '}
@@ -630,14 +622,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT b.id_board
 			FROM {db_prefix}boards AS b
 			WHERE ' . $user_info[$see_board] . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 ]]></search>
 		<add><![CDATA[
 		// SubForums
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT b.id_board
 			FROM {db_prefix}boards AS b
 			WHERE {' . $see_board .'}'. (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -646,25 +638,19 @@
 </file>
 
 
-<file name="$sourcedir/Search.php">
+<file name="CONTROLLERDIR/Search.controller.php">
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
-			SELECT b.id_board
-			FROM {db_prefix}boards AS b
-			WHERE {raw:boards_allowed_to_see}
+			$search_params['brd'] = array_keys(fetchBoardsInfo(array('boards' => $query_boards), array('include_recycle' => false, 'include_redirects' => false, 'wanna_see_board' => empty($search_params['advanced']))));
 ]]></search>
 		<add><![CDATA[
 		// SubForums
-		$request = $smcFunc['db_query']('', '
-			SELECT b.id_board
-			FROM {db_prefix}boards AS b
-			WHERE {'. $see_board .'}
+			$search_params['brd'] = array_keys(fetchBoardsInfo(array('boards' => $see_board), array('include_recycle' => false, 'include_redirects' => false, 'wanna_see_board' => empty($search_params['advanced']))));
 ]]></add>
 	</operation>
 </file>
 
-<file name="$sourcedir/Stats.php">
+<file name="CONTROLLERDIR/Stats.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
 			SUM(most_on) AS most_on, MIN(date) AS date, SUM(hits) AS hits
@@ -672,8 +658,8 @@
 		array(
 		)
 	);
-	$row = $smcFunc['db_fetch_assoc']($result);
-	$smcFunc['db_free_result']($result);
+	$row = $db->fetch_assoc($result);
+	$db->free_result($request);
 ]]></search>
 		<add><![CDATA[
 	// SubForums
@@ -692,14 +678,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}boards AS b
 		WHERE b.redirect = {string:blank_redirect}',
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}boards AS b
 		WHERE b.redirect = {string:blank_redirect}{subforums_see_board:b-id_board}',
@@ -708,7 +694,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}categories AS c',
 		array(
@@ -717,7 +703,7 @@
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	$result = $smcFunc['db_query']('', '
+	$result = $db->query('', '
 		SELECT COUNT(*)
 		FROM {db_prefix}categories AS c'. (isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? '
 		WHERE FIND_IN_SET(c.id_cat, {string:cats}) != 0' : ''),
@@ -742,7 +728,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	$members_result = $smcFunc['db_query']('', '
+	$members_result = $db->query('', '
 		SELECT id_member, real_name, posts
 		FROM {db_prefix}members
 		WHERE posts > {int:no_posts}
@@ -756,7 +742,7 @@
 		<add><![CDATA[
 	// SubForums
 	if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
-		$members_result = $smcFunc['db_query']('', '
+		$members_result = $db->query('', '
 			SELECT m.id_member, u.real_name, COUNT(m.id_msg) AS posts
 			FROM {db_prefix}messages AS m
 			LEFT JOIN {db_prefix}members AS u ON (u.id_member = m.id_member)
@@ -767,7 +753,7 @@
 			array('guest' => 'Guest')
 		);
 	else
-		$members_result = $smcFunc['db_query']('', '
+		$members_result = $db->query('', '
 			SELECT id_member, real_name, posts
 			FROM {db_prefix}members
 			WHERE posts > {int:no_posts}
@@ -784,7 +770,7 @@
 	<operation>
 		<search position="replace"><![CDATA[
 	// Board top 10.
-	$boards_result = $smcFunc['db_query']('', '
+	$boards_result = $db->query('', '
 		SELECT id_board, name, num_posts
 		FROM {db_prefix}boards AS b
 		WHERE {query_see_board}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -800,7 +786,7 @@
 ]]></search>
 		<add><![CDATA[
 	// SubForums - Board top 10.
-	$boards_result = $smcFunc['db_query']('', '
+	$boards_result = $db->query('', '
 		SELECT id_board, name, num_posts
 		FROM {db_prefix}boards AS b
 		WHERE {query_see_board}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -820,7 +806,7 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT id_topic
 			FROM {db_prefix}topics
 			WHERE num_replies != {int:no_replies}' . ($modSettings['postmod_active'] ? '
@@ -828,7 +814,7 @@
 ]]></search>
 		<add><![CDATA[
 		// SubForums
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT id_topic
 			FROM {db_prefix}topics
 			WHERE num_replies != {int:no_replies}' . ($modSettings['postmod_active'] ? '
@@ -838,14 +824,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT id_topic
 			FROM {db_prefix}topics
 			WHERE num_views != {int:no_views}
 ]]></search>
 		<add><![CDATA[
 		// SubForums
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT id_topic
 			FROM {db_prefix}topics
 			WHERE num_views != {int:no_views}{subforums_see_board:id_board}
@@ -854,14 +840,14 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT id_member_started, COUNT(*) AS hits
 			FROM {db_prefix}topics' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 			WHERE id_board != {int:recycle_board}' : '') . '
 ]]></search>
 		<add><![CDATA[
 		// SubForums
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT id_member_started, COUNT(*) AS hits
 			FROM {db_prefix}topics
 			WHERE ' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? 'id_board != {int:recycle_board}' : '1=1') . '{subforums_see_board:id_board}
@@ -869,22 +855,24 @@
 	</operation>
 </file>
 
-
-<file name="$sourcedir/Subs.php">
+<file name="SOURCEDIR/Logging.php">
 	<operation>
 		<search position="replace"><![CDATA[
 	if (!empty($modSettings['who_enabled']))
 	{
-		$serialized = $_GET + array('USER_AGENT' => $_SERVER['HTTP_USER_AGENT']);
+		$req = request();
+		$serialized = $_GET + array('USER_AGENT' => $req->user_agent());
 ]]></search>
 		<add><![CDATA[
 	if (!empty($modSettings['who_enabled']))
 	{
 		// SubForums
-		$serialized = $_GET + array('USER_AGENT' => $_SERVER['HTTP_USER_AGENT']) + array('subforums' => (!empty($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? array('host' => $_SERVER['SERVER_NAME'], 'name' => $modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']) : ''));
+		$serialized = $_GET + array('USER_AGENT' => $req->user_agent()) + array('subforums' => (!empty($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? array('host' => $_SERVER['SERVER_NAME'], 'name' => $modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']) : ''));
 ]]></add>
 	</operation>
+</file>
 
+<file name="SOURCEDIR/Subs.php">
 	<operation>
 		<search position="before"><![CDATA[
 	$context['common_stats'] = array(
@@ -905,277 +893,183 @@
 	</operation>
 </file>
 
-<file name="$sourcedir/Subs-BoardIndex.php">
+<file name="SOURCEDIR/database/Db-mysql.class.php">
 	<operation>
 		<search position="replace"><![CDATA[
-		WHERE {query_see_board}' . (empty($boardIndexOptions['countChildPosts']) ? (empty($boardIndexOptions['base_level']) ? '' : '
-			AND b.child_level >= {int:child_level}') : '
-			AND b.child_level BETWEEN ' . $boardIndexOptions['base_level'] . ' AND ' . ($boardIndexOptions['base_level'] + 1)),
-		array(
-			'current_member' => $user_info['id'],
-			'child_level' => $boardIndexOptions['base_level'],
-			'blank_string' => '',
-		)
-	);
-]]></search>
-	</operation>
-</file>
+	public static function initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
+	{
+		global $mysql_set_mode;
 
-<file name="$sourcedir/Subs-Db-mysql.php">
-	<operation>
-		<search position="replace"><![CDATA[
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
-{
-	global $smcFunc, $mysql_set_mode;
 ]]></search>
 		<add><![CDATA[
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
-{
-	global $smcFunc, $mysql_set_mode, $sourcedir;
+	public static function initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
+	{
+		global $mysql_set_mode;
 
-	// include SubForums DB functions
-	include_once($sourcedir .'/SubForums/Subforums-DB.php');
+		// include SubForums DB functions
+		include_once(SOURCEDIR .'/SubForums/Subforums-DB.php');
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-function smf_db_replacement__callback($matches)
-{
-	global $db_callback, $user_info, $db_prefix;
+	public function replacement__callback($matches)
+	{
+		global $db_callback, $user_info, $db_prefix;
 
-	list ($values, $connection) = $db_callback;
+		list ($values, $connection) = $db_callback;
 
-	if (!is_resource($connection))
-		db_fatal_error();
+		// Connection gone???  This should *never* happen at this point, yet it does :'(
+		if (!is_object($connection))
+			display_db_error();
 
-	if ($matches[1] === 'db_prefix')
-		return $db_prefix;
+		if ($matches[1] === 'db_prefix')
+			return $db_prefix;
 
-	if ($matches[1] === 'query_see_board')
-		return $user_info['query_see_board'];
+		if ($matches[1] === 'query_see_board')
+			return $user_info['query_see_board'];
 
-	if ($matches[1] === 'query_wanna_see_board')
-		return $user_info['query_wanna_see_board'];
+		if ($matches[1] === 'query_wanna_see_board')
+			return $user_info['query_wanna_see_board'];
 ]]></search>
 		<add><![CDATA[
-function smf_db_replacement__callback($matches)
-{
-	global $db_callback, $user_info, $db_prefix;
+	public function replacement__callback($matches)
+	{
+		global $db_callback, $user_info, $db_prefix;
 
-	list ($query, $values, $connection) = $db_callback;
+		list ($query, $values, $connection) = $db_callback;
 
-	// subforums db_callback.
-	if(($subvar = SubForums_dbcallback($matches, $query)) !== null)
-		return $subvar;
+		// subforums db_callback.
+		if(($subvar = SubForums_dbcallback($matches, $query)) !== null)
+			return $subvar;
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-	// Only bother if there's something to replace.
-	if (strpos($db_string, '{') !== false)
-	{
-		// This is needed by the callback function.
-		$db_callback = array($db_values, $connection == null ? $db_connection : $connection);
+		// Only bother if there's something to replace.
+		if (strpos($db_string, '{') !== false)
+		{
+			// This is needed by the callback function.
+			$db_callback = array($db_values, $connection === null ? $this->_connection : $connection);
 ]]></search>
 		<add><![CDATA[
-	// Only bother if there's something to replace.
-	if (strpos($db_string, '{') !== false)
-	{
-		// This is needed by the callback function.
-		$db_callback = array($db_string, $db_values, $connection == null ? $db_connection : $connection);
+		// Only bother if there's something to replace.
+		if (strpos($db_string, '{') !== false)
+		{
+			// This is needed by the callback function.
+			$db_callback = array($db_string, $db_values, $connection === null ? $this->_connection : $connection);
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-	if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
-	{
-		// Pass some values to the global space for use in the callback function.
-		$db_callback = array($db_values, $connection);
+		if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
+		{
+			// Pass some values to the global space for use in the callback function.
+			$db_callback = array($db_values, $connection);
 ]]></search>
 		<add><![CDATA[
-	if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
-	{
-		// Pass some values to the global space for use in the callback function.
-		$db_callback = array($db_string, $db_values, $connection);
+		if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
+		{
+			// Pass some values to the global space for use in the callback function.
+			$db_callback = array($db_string, $db_values, $connection);
 ]]></add>
 	</operation>
 </file>
 
-<file name="$sourcedir/Subs-Db-postgresql.php">
+<file name="SOURCEDIR/database/Db-postgresql.class.php">
 	<operation>
 		<search position="replace"><![CDATA[
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, &$db_prefix, $db_options = array())
-{
-	global $smcFunc, $mysql_set_mode;
+	public static function initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
+	{
 ]]></search>
 		<add><![CDATA[
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, &$db_prefix, $db_options = array())
-{
-	global $smcFunc, $mysql_set_mode, $sourcedir;
+	public static function initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
+	{
 
-	include_once($sourcedir .'/SubForums/Subforums-DB.php');
+	include_once(SOURCEDIR .'/SubForums/Subforums-DB.php');
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-function smf_db_replacement__callback($matches)
-{
-	global $db_callback, $user_info, $db_prefix;
+	public function replacement__callback($matches)
+	{
+		global $db_callback, $user_info, $db_prefix;
 
-	list ($values, $connection) = $db_callback;
+		list ($values, $connection) = $db_callback;
 
-	if (!is_resource($connection))
-		db_fatal_error();
+		// Connection gone?
+		if (!is_resource($connection))
+			display_db_error();
 
-	if ($matches[1] === 'db_prefix')
-		return $db_prefix;
+		if ($matches[1] === 'db_prefix')
+			return $db_prefix;
 
-	if ($matches[1] === 'query_see_board')
-		return $user_info['query_see_board'];
+		if ($matches[1] === 'query_see_board')
+			return $user_info['query_see_board'];
 
-	if ($matches[1] === 'query_wanna_see_board')
-		return $user_info['query_wanna_see_board'];
+		if ($matches[1] === 'query_wanna_see_board')
+			return $user_info['query_wanna_see_board'];
 ]]></search>
 		<add><![CDATA[
-function smf_db_replacement__callback($matches)
-{
-	global $db_callback, $user_info, $db_prefix;
+	public function replacement__callback($matches)
+	{
+		global $db_callback, $user_info, $db_prefix;
 
-	list ($query, $values, $connection) = $db_callback;
+		list ($query, $values, $connection) = $db_callback;
 
-	// call the subforums db_callback.
-	if(($subvar = SubForums_dbcallback($matches, $query)) !== null)
-		return $subvar;
+		// call the subforums db_callback.
+		if(($subvar = SubForums_dbcallback($matches, $query)) !== null)
+			return $subvar;
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-	// Only bother if there's something to replace.
-	if (strpos($db_string, '{') !== false)
-	{
-		// This is needed by the callback function.
-		$db_callback = array($db_values, $connection == null ? $db_connection : $connection);
+		// Only bother if there's something to replace.
+		if (strpos($db_string, '{') !== false)
+		{
+			// This is needed by the callback function.
+			$db_callback = array($db_values, $connection === null ? $this->_connection : $connection);
 ]]></search>
 		<add><![CDATA[
-	// Only bother if there's something to replace.
-	if (strpos($db_string, '{') !== false)
-	{
-		// This is needed by the callback function.
-		$db_callback = array($db_string, $db_values, $connection == null ? $db_connection : $connection);
+		// Only bother if there's something to replace.
+		if (strpos($db_string, '{') !== false)
+		{
+			// This is needed by the callback function.
+			$db_callback = array($db_string, $db_values, $connection === null ? $this->_connection : $connection);
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-	if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
-	{
-		// Pass some values to the global space for use in the callback function.
-		$db_callback = array($db_values, $connection);
+		if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
+		{
+			// Pass some values to the global space for use in the callback function.
+			$db_callback = array($db_values, $connection);
 ]]></search>
 		<add><![CDATA[
-	if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
-	{
-		// Pass some values to the global space for use in the callback function.
-		$db_callback = array($db_string, $db_values, $connection);
-]]></add>
-	</operation>
-</file>
-
-<file name="$sourcedir/Subs-Db-sqlite.php">
-	<operation>
-		<search position="replace"><![CDATA[
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
-{
-	global $smcFunc, $mysql_set_mode, $db_in_transact, $sqlite_error;
-]]></search>
-		<add><![CDATA[
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
-{
-	global $smcFunc, $mysql_set_mode, $db_in_transact, $sqlite_error, $sourcedir;
-
-	include_once($sourcedir .'/SubForums/Subforums-DB.php');
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-function smf_db_replacement__callback($matches)
-{
-	global $db_callback, $user_info, $db_prefix;
-
-	list ($values, $connection) = $db_callback;
-
-	if ($matches[1] === 'db_prefix')
-		return $db_prefix;
-
-	if ($matches[1] === 'query_see_board')
-		return $user_info['query_see_board'];
-
-	if ($matches[1] === 'query_wanna_see_board')
-		return $user_info['query_wanna_see_board'];
-]]></search>
-		<add><![CDATA[
-function smf_db_replacement__callback($matches)
-{
-	global $db_callback, $user_info, $db_prefix;
-
-	list ($query, $values, $connection) = $db_callback;
-
-	// call the subforums db_callback.
-	if(($subvar = SubForums_dbcallback($matches, $query)) !== null)
-		return $subvar;
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-	// Only bother if there's something to replace.
-	if (strpos($db_string, '{') !== false)
-	{
-		// This is needed by the callback function.
-		$db_callback = array($db_values, $connection == null ? $db_connection : $connection);
-]]></search>
-		<add><![CDATA[
-	// Only bother if there's something to replace.
-	if (strpos($db_string, '{') !== false)
-	{
-		// This is needed by the callback function.
-		$db_callback = array($db_string, $db_values, $connection == null ? $db_connection : $connection);
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-	if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
-	{
-		// Pass some values to the global space for use in the callback function.
-		$db_callback = array($db_values, $connection);
-]]></search>
-		<add><![CDATA[
-	if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
-	{
-		// Pass some values to the global space for use in the callback function.
-		$db_callback = array($db_string, $db_values, $connection);
+		if (empty($db_values['security_override']) && (!empty($db_values) || strpos($db_string, '{db_prefix}') !== false))
+		{
+			// Pass some values to the global space for use in the callback function.
+			$db_callback = array($db_string, $db_values, $connection);
 ]]></add>
 	</operation>
 </file>
 
-<file name="$sourcedir/Subs-MembersOnline.php">
+<file name="SUBSDIR/MembersOnline.subs.php">
 	<operation>
 		<search position="replace"><![CDATA[
 	// Load the users online right now.
-	$request = $smcFunc['db_query']('', '
+	$request = $db->query('', '
 		SELECT
 			lo.id_member, lo.log_time, lo.id_spider, mem.real_name, mem.member_name, mem.show_online,
 ]]></search>
 		<add><![CDATA[
 	// Load the users online right now.
-	$request = $smcFunc['db_query']('', '
+	$request = $db->query('', '
 		SELECT
 			lo.id_member, lo.log_time, lo.id_spider, lo.url, mem.real_name, mem.member_name, mem.show_online,
 ]]></add>
@@ -1183,7 +1077,7 @@ function smf_db_replacement__callback($matches)
 
 	<operation>
 		<search position="replace"><![CDATA[
-	while ($row = $smcFunc['db_fetch_assoc']($request))
+	while ($row = $db->fetch_assoc($request))
 	{
 		if (empty($row['real_name']))
 		{
@@ -1191,13 +1085,13 @@ function smf_db_replacement__callback($matches)
 			if ($row['id_spider'] && isset($spiders[$row['id_spider']]))
 ]]></search>
 		<add><![CDATA[
-	while ($row = $smcFunc['db_fetch_assoc']($request))
+	while ($row = $db->fetch_assoc($request))
 	{
 		// Subforums
 		$subf = unserialize($row['url']);
 		if(isset($subf['subforums']) && SubforumsAllocator('checkurl', $subf['subforums']) != $_SERVER['SERVER_NAME'])
 			continue;
-
+			
 		if (empty($row['real_name']))
 		{
 			// Do we think it's a spider?
@@ -1206,25 +1100,28 @@ function smf_db_replacement__callback($matches)
 	</operation>
 </file>
 
-<file name="$sourcedir/Who.php">
+<file name="CONTROLLERDIR/Who.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
-	// Put it in the context variables.
-	foreach ($context['members'] as $i => $member)
-	{
-		if ($member['id'] != 0)
-			$member['id'] = loadMemberContext($member['id']) ? $member['id'] : 0;
+		// Put it in the context variables.
+		foreach ($context['members'] as $i => $member)
+		{
+			if ($member['id'] != 0)
+				$member['id'] = loadMemberContext($member['id']) ? $member['id'] : 0;
 ]]></search>
 		<add><![CDATA[
-		// check for Subforums
-		if(isset($member['query']['subforums']) && SubforumsAllocator('checkurl', $member['query']['subforums']) != $_SERVER['SERVER_NAME'])
-		{
-			unset($context['members'][$i]);
-			continue;
-		}
+
+			// check for Subforums
+			if(isset($member['query']['subforums']) && SubforumsAllocator('checkurl', $member['query']['subforums']) != $_SERVER['SERVER_NAME'])
+			{
+				unset($context['members'][$i]);
+				continue;
+			}
 ]]></add>
 	</operation>
+</file>
 
+<file name="SUBSDIR/Who.subs.php">
 	<operation>
 		<search position="before"><![CDATA[
 	foreach ($url_list as $k => $url)
@@ -1242,19 +1139,17 @@ function smf_db_replacement__callback($matches)
 	</operation>
 </file>
 
-<file name="$themedir/Login.template.php">
+<file name="THEMEDIR/Login.template.php">
 	<operation>
-		<search position="replace"><![CDATA[id="maintenance_mode">
-		<div class="cat_bar">
-			<h3 class="catbg">', $context['title'], '</h3>
-		</div>
-		<p class="description">
+		<search position="replace"><![CDATA[
+	<div class="login" id="maintenance_mode">
+		<h2 class="category_header">', $context['title'], '</h2>
+		<p class="description flow_auto">
 ]]></search>
-		<add><![CDATA[id="maintenance_mode">
-		<div class="cat_bar subforum_hide">
-			<h3 class="catbg">', $context['title'], '</h3>
-		</div>
-		<p class="description subforum_hide">
+		<add><![CDATA[
+	<div class="login cat_bar subforum_hide" id="maintenance_mode">
+		<h2 class="category_header">', $context['title'], '</h2>
+		<p class="description flow_auto subforum_hide">
 ]]></add>
 	</operation>
 </file>

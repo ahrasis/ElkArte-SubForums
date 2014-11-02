@@ -1,32 +1,46 @@
 <?xml version="1.0"?>
-<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
-<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
-	<id>portamx_corp:SubForums</id>
-	<name>PMx-SubForums</name>
+<!DOCTYPE package-info SYSTEM "http://www.elkarte.net/site/package-info">
+<package-info xmlns="http://www.elkarte.net/site/package-info" xmlns:elk="http://www.elkarte.net/">
+	<license><![CDATA[
+/**
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
+]]></license>
+	<id>ahrasis:SubForums</id>
+	<name>SFA: Sub Forums Addon</name>
 	<version>1.41</version>
 	<type>modification</type>
 
-	<install for="2.0.*">
+	<install for="1.0.*">
 		<readme type="file" parsebbc="true">install/readme.bbc</readme>
 		<database type="file">install/dbinstall.php</database>
 		<modification format="xml" type="file">install/subforuminst.xml</modification>
 
-		<require-dir name="Sources/SubForums" destination="$sourcedir" />
-		<require-dir name="Themes/default/SubForums" destination="$themedir" />
-		<require-dir name="Themes/default/languages/SubForums" destination="$languagedir" />
-		<require-file name="admin_images/subforums.gif" destination="$imagesdir/admin" />
+		<require-dir name="sources/SubForums" destination="SOURCEDIR/addons" />
+		<require-dir name="themes/SubForums" destination="THEMEDIR/addons" />
+		<require-dir name="languages/SubForums" destination="LANGUAGEDIR/addons" />
+		<require-dir name="images/SubForums" destination="IMAGESDIR/addons" />
 		<redirect url="$scripturl?action=admin;area=subforums" timeout="15000">install/installdone.html</redirect>
 	</install>
 
-	<uninstall for="2.0.*">
+	<uninstall for="1.0.*">
 		<readme type="file" parsebbc="true">install/remove.bbc</readme>
 		<code type="file">removehook.php</code>
 		<modification reverse="true">install/subforuminst.xml</modification>
 
-		<remove-dir name="$sourcedir/SubForums" />
-		<remove-dir name="$themedir/SubForums" />
-		<remove-dir name="$languagedir/SubForums" />
-		<remove-file name="$imagesdir/admin/subforums.gif" />
+		<remove-dir name="SOURCEDIR/addons/SubForums" />
+		<remove-dir name="THEMEDIR/addons/SubForums" />
+		<remove-dir name="LANGUAGEDIR/addons/SubForums" />
+		<remove-dir name="IMAGESDIR/addons/SubForums" />
 		<redirect url="$scripturl" timeout="15000">install/removedone.html</redirect>
 	</uninstall>
 </package-info>

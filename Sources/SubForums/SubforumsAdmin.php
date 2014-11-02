@@ -1,12 +1,18 @@
 <?php
 /**
-* AdminSubforums.php
-*
-* Software Version: SMF Subforums v1.41
-* Software by: PortaMx corp.
-**/
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
 
-if (!defined('SMF'))
+if (!defined('ELK'))
 	die('Hacking attempt...');
 
 /**
@@ -14,7 +20,7 @@ if (!defined('SMF'))
 */
 function SubforumsAdmin()
 {
-	global $smcFunc, $context, $modSettings, $txt;
+	global $context, $modSettings, $txt;
 
 	if(isset($_GET['action']) && $_GET['action'] == 'admin' && isset($_GET['area']) && $_GET['area'] == 'subforums')
 	{
@@ -35,15 +41,15 @@ function SubforumsAdmin()
 			// edit entry?
 			if(!empty($_POST['sf_edit']))
 			{
-				$request = $smcFunc['db_query']('', '
+				$request = $db->query('', '
 						SELECT id, forum_host, forum_name, cat_order, id_theme, language, acs_groups, reg_group
 						FROM {db_prefix}subforums
 						WHERE id = {int:id}',
 					array('id' => $_POST['sf_edit'])
 				);
-				if($smcFunc['db_num_rows']($request) > 0)
+				if($db->num_rows($request) > 0)
 				{
-					$row = $smcFunc['db_fetch_assoc']($request);
+					$row = $db->fetch_assoc($request);
 					$context['subforums']['data'] = array(
 						'id' => $row['id'],
 						'host' => $row['forum_host'],
@@ -54,7 +60,7 @@ function SubforumsAdmin()
 						'groups' => $row['acs_groups'] === '' ? array() : explode(',', $row['acs_groups']),
 						'reg_group'=> $row['reg_group'] === '' ? -1 : $row['reg_group'],
 					);
-					$smcFunc['db_free_result']($request);
+					$db->free_result($request);
 				}
 				else
 					$_POST['sf_edit'] = 0;
@@ -81,7 +87,7 @@ function SubforumsAdmin()
 			// remove entry
 			if(!empty($_POST['sf_delete']))
 			{
-				$smcFunc['db_query']('', '
+				$db->query('', '
 					DELETE FROM {db_prefix}subforums
 					WHERE id = {int:id}',
 					array('id' => $_POST['sf_delete'])
@@ -98,7 +104,7 @@ function SubforumsAdmin()
 				{
 					foreach($_POST as $key => $val)
 						if(substr($key, 0, 10) == 'subforums_')
-							$smcFunc['db_insert']('replace', '
+							$db->insert('replace', '
 								{db_prefix}settings',
 								array(
 									'variable' => 'string',
@@ -118,21 +124,21 @@ function SubforumsAdmin()
 						$_POST['SF_groups'] = array();
 
 					// get Messages and Topics
-					$result = $smcFunc['db_query']('', '
+					$result = $db->query('', '
 						SELECT SUM(num_posts + unapproved_posts) AS total_posts, SUM(num_topics + unapproved_topics) AS total_topics
 						FROM {db_prefix}boards
 						WHERE id_cat IN ('. implode(',', $_POST['SF_category']) .')',
 						array()
 					);
-					$row = $smcFunc['db_fetch_assoc']($result);
+					$row = $db->fetch_assoc($result);
 					$posts = empty($row['total_posts']) ? 0 : $row['total_posts'];
 					$topics = empty($row['total_topics']) ? 0 : $row['total_topics'];
-					$smcFunc['db_free_result']($result);
+					$db->free_result($request);
 
 					// add new?
 					if($_POST['sf_save'] == -1)
 					{
-						$smcFunc['db_insert']('', '
+						$db->insert('', '
 							{db_prefix}subforums',
 							array(
 								'forum_host' => 'string',
@@ -163,7 +169,7 @@ function SubforumsAdmin()
 					// update...
 					else
 					{
-						$smcFunc['db_query']('', '
+						$db->query('', '
 								UPDATE {db_prefix}subforums
 								SET forum_host = {string:forum_host}, forum_name = {string:forum_name},
 									cat_order = {string:cat_order}, id_theme = {int:id_theme}, language = {string:language},
@@ -198,15 +204,15 @@ function SubforumsAdmin()
 		{
 			// get all subforums
 			$context['subforums']['data'] = array();
-			$request = $smcFunc['db_query']('', '
+			$request = $db->query('', '
 					SELECT id, forum_host, forum_name, cat_order, id_theme, language, acs_groups, total_posts, total_topics
 					FROM {db_prefix}subforums
 					ORDER BY id',
 				array()
 			);
-			if($smcFunc['db_num_rows']($request) > 0)
+			if($db->num_rows($request) > 0)
 			{
-				while($row = $smcFunc['db_fetch_assoc']($request))
+				while($row = $db->fetch_assoc($request))
 					$context['subforums']['data'][] = array(
 						'id' => $row['id'],
 						'host' => $row['forum_host'],
@@ -218,13 +224,13 @@ function SubforumsAdmin()
 						'posts' => $row['total_posts'],
 						'topics' => $row['total_topics'],
 					);
-				$smcFunc['db_free_result']($request);
+				$db->free_result($request);
 			}
 		}
 
 		// get known themes
 		$context['subforums']['SMF_Themes'] = array();
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 				SELECT id_theme, value
 				FROM {db_prefix}themes
 				WHERE variable = {string:varname} AND id_theme IN({array_int:knownThemes})
@@ -234,26 +240,26 @@ function SubforumsAdmin()
 				'knownThemes' => explode(',', $modSettings['knownThemes']),
 			)
 		);
-		while($row = $smcFunc['db_fetch_assoc']($request))
+		while($row = $db->fetch_assoc($request))
 		{
 			if($row['id_theme'] != $modSettings['theme_guests'])
 				$context['subforums']['SMF_Themes'][$row['id_theme']] = $row['value'];
 		}
-		$smcFunc['db_free_result']($request);
+		$db->free_result($request);
 
 		// get all categories
 		$context['subforums']['SMF_Cats'] = array();
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 				SELECT id_cat, name
 				FROM {db_prefix}categories
 				ORDER BY cat_order',
 			array()
 		);
-		if($smcFunc['db_num_rows']($request) > 0)
+		if($db->num_rows($request) > 0)
 		{
-			while($row = $smcFunc['db_fetch_assoc']($request))
+			while($row = $db->fetch_assoc($request))
 				$context['subforums']['SMF_Cats'][$row['id_cat']] = $row['name'];
-			$smcFunc['db_free_result']($request);
+			$db->free_result($request);
 		}
 
 		// get all groups
@@ -261,25 +267,25 @@ function SubforumsAdmin()
 			-1 => $txt['membergroups_guests'],
 			0 =>  $txt['membergroups_members'],
 		);
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 				SELECT id_group, group_name
 				FROM {db_prefix}membergroups
 				WHERE min_posts = -1 and id_group != 1
 				ORDER BY id_group',
 			array()
 		);
-		while($row = $smcFunc['db_fetch_assoc']($request))
+		while($row = $db->fetch_assoc($request))
 			$context['subforums']['SMF_groups'] += array(
 				$row['id_group'] => $row['group_name'],
 			);
-		$smcFunc['db_free_result']($request);
+		$db->free_result($request);
 
 		// get all languages
 		$context['subforums']['languages'] = getLanguages();
 
 		// load template
-		loadTemplate('SubForums/Subforums');
-		loadLanguage('SubForums/Subforums');
+		loadTemplate('addons/SubForums/Subforums');
+		loadLanguage('addons/SubForums/Subforums');
 
 		// setup pagetitle
 		$context['page_title'] = $txt['admin_subforums_title'];
@@ -291,26 +297,26 @@ function SubforumsAdmin()
 **/
 function SubForums_ClearCache()
 {
-	global $modSettings, $smcFunc, $boardurl, $base_boardurl;
+	global $modSettings, $boardurl, $base_boardurl;
 
 	$org_url = $boardurl;
 	$boardurl = $base_boardurl;
 	cache_put_data('modSettings', NULL, 120);
 	cache_put_data('PMx-SubForums-', NULL, 120);
 
-	$request = $smcFunc['db_query']('', '
+	$request = $db->query('', '
 		SELECT forum_host
 		FROM {db_prefix}subforums',
 		array()
 	);
-	while($row = $smcFunc['db_fetch_assoc']($request))
+	while($row = $db->fetch_assoc($request))
 	{
 		$parts = parse_url($boardurl);
 		$boardurl = $parts['scheme'] .'://'. $row['forum_host'] .(!empty($parts['path']) ? $parts['path'] : '');
 		cache_put_data('modSettings', NULL, 120);
 		cache_put_data('PMx-SubForums-', NULL, 120);
 	}
-	$smcFunc['db_free_result']($request);
+	$db->free_result($request);
 	$boardurl = $org_url;
 }
 ?>

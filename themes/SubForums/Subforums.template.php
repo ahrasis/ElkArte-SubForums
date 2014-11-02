@@ -1,10 +1,16 @@
 <?php
 /**
-* Subforums.template.php
-*
-* Software Version: SMF Subforums v1.41
-* Software by: PortaMx corp.
-**/
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */ 
 
 function template_main()
 {
@@ -53,7 +59,7 @@ function template_main()
 
 			if($_SERVER['SERVER_NAME'] == $part['host'])
 				echo '
-						&nbsp;<img src="'. $settings['default_theme_url'] .'/Subforums/images/subforums_act.gif' .'" alt="**" />';
+						&nbsp;<img src="'. IMAGESDIR .'/addons/SubForums/subforums_act.gif' .'" alt="**" />';
 
 			echo '
 						<br />'. (empty($part['name']) ? $mbname : $part['name']) .'
@@ -113,7 +119,7 @@ function template_main()
 
 		if($_SERVER['SERVER_NAME'] == $baseurl['host'])
 			echo '
-						<img src="'. $settings['default_theme_url'] .'/Subforums/images/subforums_act.gif' .'" alt="**" />';
+						<img src="'. IMAGESDIR .'/addons/SubForums/subforums_act.gif' .'" alt="**" />';
 
 		echo '
 						<br />'. $mbname .'
