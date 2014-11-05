@@ -13,6 +13,8 @@
  */
 
 global $db_prefix, $user_info, $boardurl, $boarddir, $sourcedir, $txt, $dbinstall_string;
+	
+$db = database();
 
 // Load the SSI.php
 if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('ELK'))

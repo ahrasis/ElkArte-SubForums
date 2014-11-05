@@ -395,43 +395,40 @@
 	</operation>
 </file>
 
-
-<file name="CONTROLLERDIR/ProfileInfo.controller.php">
+<file name="SUBSDIR/Profile.subs.php">
 	<operation>
 		<search position="replace"><![CDATA[
-	if ($context['is_topics'])
-		$request = $db->query('', '
-			SELECT COUNT(*)
-			FROM {db_prefix}topics AS t' . ($user_info['query_see_board'] == '1=1' ? '' : '
-				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})') . '
-			WHERE t.id_member_started = {int:current_member}' . (!empty($board) ? '
+	$request = $db->query('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}topics AS t' . ($user_info['query_see_board'] == '1=1' ? '' : '
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})') . '
+		WHERE t.id_member_started = {int:current_member}' . (!empty($board) ? '
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-	if ($context['is_topics'])
-		$request = $db->query('', '
-			SELECT COUNT(*)
-			FROM {db_prefix}topics AS t' . ($user_info['query_see_board'] == '1=1' ? '' : '
-				INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})') . '
+	$request = $db->query('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}topics AS t' . ($user_info['query_see_board'] == '1=1' ? '' : '
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = t.id_board AND {query_see_board})') . '
 			WHERE t.id_member_started = {int:current_member}' . ($user_info['query_see_board'] == '1=1' ? '{subforums_see_board:t-id_board}' : '') . (!empty($board) ? '
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$request = $db->query('', '
-			SELECT COUNT(*)
-			FROM {db_prefix}messages AS m' . ($user_info['query_see_board'] == '1=1' ? '' : '
-				INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board AND {query_see_board})') . '
-			WHERE m.id_member = {int:current_member}' . (!empty($board) ? '
+	$request = $db->query('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}messages AS m' . ($user_info['query_see_board'] == '1=1' ? '' : '
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board AND {query_see_board})') . '
+		WHERE m.id_member = {int:current_member}' . (!empty($board) ? '
 ]]></search>
 		<add><![CDATA[
 	// SubForums
-		$request = $db->query('', '
-			SELECT COUNT(*)
-			FROM {db_prefix}messages AS m' . ($user_info['query_see_board'] == '1=1' ? '' : '
-				INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board AND {query_see_board})') . '
-			WHERE m.id_member = {int:current_member}' . ($user_info['query_see_board'] == '1=1' ? '{subforums_see_board:m-id_board}' : '') . (!empty($board) ? '
+	$request = $db->query('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}messages AS m' . ($user_info['query_see_board'] == '1=1' ? '' : '
+			INNER JOIN {db_prefix}boards AS b ON (b.id_board = m.id_board AND {query_see_board})') . '
+		WHERE m.id_member = {int:current_member}' . ($user_info['query_see_board'] == '1=1' ? '{subforums_see_board:m-id_board}' : '') . (!empty($board) ? '
 ]]></add>
 	</operation>
 
@@ -450,103 +447,41 @@
 		WHERE m.id_member = {int:current_member}{subforums_see_board:m-id_board}' . (!empty($board) ? '
 ]]></add>
 	</operation>
+</file>
 
+<file name="CONTROLLERDIR/ProfileInfo.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
-	$context['time_logged_in'] = ($timeDays > 0 ? $timeDays . $txt['totalTimeLogged2'] : '') . ($timeHours > 0 ? $timeHours . $txt['totalTimeLogged3'] : '') . floor(($user_profile[$memID]['total_time_logged_in'] % 3600) / 60) . $txt['totalTimeLogged4'];
-	$context['num_posts'] = comma_format($user_profile[$memID]['posts']);
+		$context['time_logged_in'] = ($timeDays > 0 ? $timeDays . $txt['totalTimeLogged2'] : '') . ($timeHours > 0 ? $timeHours . $txt['totalTimeLogged3'] : '') . floor(($user_profile[$memID]['total_time_logged_in'] % 3600) / 60) . $txt['totalTimeLogged4'];
+		$context['num_posts'] = comma_format($user_profile[$memID]['posts']);
 ]]></search>
 		<add><![CDATA[
-	// SubForums
-	if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
-	{
-		$result = $db->query('', '
-			SELECT COUNT(id_msg)
-			FROM {db_prefix}messages
-			WHERE id_member = {int:id_mem}{subforums_see_board:id_board}',
-			array('id_mem' => $memID)
-		);
-		list($tmp) = $db->fetch_row($result);
-		$db->free_result($request);
-		$context['num_posts'] = comma_format($tmp);
-	}
+		// SubForums
+		if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
+		{
+			$result = $db->query('', '
+				SELECT COUNT(id_msg)
+				FROM {db_prefix}messages
+				WHERE id_member = {int:id_mem}{subforums_see_board:id_board}',
+				array('id_mem' => $memID)
+			);
+			list($tmp) = $db->fetch_row($result);
+			$db->free_result($request);
+			$context['num_posts'] = comma_format($tmp);
+		}
 ]]></add>
 	</operation>
+</file>
 
+<file name="SUBSDIR/Post.subs.php">
 	<operation>
 		<search position="replace"><![CDATA[
-	$result = $db->query('', '
-		SELECT COUNT(*)
-		FROM {db_prefix}topics
-		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
-			AND id_board != {int:recycle_board}' : ''),
+		WHERE {query_wanna_see_board}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			AND b.id_board != {int:recycle_board}' : '') . '
 ]]></search>
 		<add><![CDATA[
-	// SubForums
-	$result = $db->query('', '
-		SELECT COUNT(*)
-		FROM {db_prefix}topics
-		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
-			AND id_board != {int:recycle_board}' : '') .'{subforums_see_board:id_board}',
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-	$result = $db->query('', '
-		SELECT COUNT(*)
-		FROM {db_prefix}topics
-		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
-			AND id_board != {int:recycle_board}' : '') . '
-			AND id_poll != {int:no_poll}',
-]]></search>
-		<add><![CDATA[
-	// SubForums
-	$result = $db->query('', '
-		SELECT COUNT(*)
-		FROM {db_prefix}topics
-		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
-			AND id_board != {int:recycle_board}' : '') . '
-			AND id_poll != {int:no_poll}{subforums_see_board:id_board}',
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-	$result = $db->query('distinct_poll_votes', '
-		SELECT COUNT(DISTINCT id_poll)
-		FROM {db_prefix}log_polls
-		WHERE id_member = {int:current_member}',
-]]></search>
-		<add><![CDATA[
-	// SubForums
-	$result = $db->query('distinct_poll_votes', '
-		SELECT COUNT(DISTINCT p.id_poll)
-		FROM {db_prefix}log_polls AS p
-			LEFT JOIN {db_prefix}topics as t ON (p.id_poll = t.id_poll)
-		WHERE id_member = {int:current_member}{subforums_see_board:t-id_board}',
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-	$result = $db->query('user_activity_by_time', '
-		SELECT
-			HOUR(FROM_UNIXTIME(poster_time + {int:time_offset})) AS hour,
-			COUNT(*) AS post_count
-		FROM {db_prefix}messages
-		WHERE id_member = {int:current_member}' . ($modSettings['totalMessages'] > 100000 ? '
-			AND id_topic > {int:top_ten_thousand_topics}' : '') . '
-]]></search>
-		<add><![CDATA[
-	// SubForums
-	$result = $db->query('user_activity_by_time', '
-		SELECT
-			HOUR(FROM_UNIXTIME(poster_time + {int:time_offset})) AS hour,
-			COUNT(*) AS post_count
-		FROM {db_prefix}messages
-		WHERE id_member = {int:current_member}' . ($modSettings['totalMessages'] > 100000 ? '
-			AND id_topic > {int:top_ten_thousand_topics}' : '') . '{subforums_see_board:id_board}
+		WHERE {query_wanna_see_board}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			AND b.id_board != {int:recycle_board}' : '') . '{subforums_see_board:id_board}',
 ]]></add>
 	</operation>
 </file>
@@ -555,56 +490,59 @@
 <file name="CONTROLLERDIR/Recent.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
-			$query_parameters['max_id_msg'] = max(0, $modSettings['maxMsgID'] - 600 - $_REQUEST['start'] * 10);
-		}
+				$query_parameters['max_id_msg'] = max(0, $modSettings['maxMsgID'] - 600 - $_REQUEST['start'] * 10);
+			}
 
-		$context['page_index'] = constructPageIndex($scripturl . '?action=recent;board=' . $board . '.%1$d', $_REQUEST['start'], min(100, $total_posts), 10, true);
-	}
-	else
-	{
-]]></search>
-		<add><![CDATA[
-		// SubForums
-		if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
-		{
-			$request = $db->query('', '
-				SELECT IFNULL(COUNT(id_msg),0), IFNULL(SUM(id_msg),0)
-				FROM {db_prefix}messages
-				WHERE 1=1{subforums_see_board:id_board}',
-				array()
-			);
-			list($recent_total_posts, $recent_maxMsgID) = $db->fetch_row($request);
-			$db->free_result($result);
-			if(!empty($recent_total_posts))
-				$recent_maxMsgID = intval($recent_maxMsgID / $recent_total_posts);
+			$context['page_index'] = constructPageIndex($scripturl . '?action=recent;board=' . $board . '.%1$d', $_REQUEST['start'], min(100, $board_data[$board]['num_posts']), 10, true);
 		}
+		// All the recent posts across boards and categories it is then
 		else
 		{
-			$recent_total_posts = $modSettings['totalMessages'];
-			$recent_maxMsgID = $modSettings['maxMsgID'];
-		}
+]]></search>
+		<add><![CDATA[
+			// SubForums
+			if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
+			{
+				$request = $db->query('', '
+					SELECT IFNULL(COUNT(id_msg),0), IFNULL(SUM(id_msg),0)
+					FROM {db_prefix}messages
+					WHERE 1=1{subforums_see_board:id_board}',
+					array()
+				);
+				list($recent_total_posts, $recent_maxMsgID) = $db->fetch_row($request);
+				$db->free_result($result);
+				if(!empty($recent_total_posts))
+					$recent_maxMsgID = intval($recent_maxMsgID / $recent_total_posts);
+			}
+			else
+			{
+				$recent_total_posts = $modSettings['totalMessages'];
+				$recent_maxMsgID = $modSettings['maxMsgID'];
+			}
 ]]></add>
 	</operation>
 
 	<operation>
 		<search position="replace"><![CDATA[
-		$query_parameters['max_id_msg'] = max(0, $modSettings['maxMsgID'] - 100 - $_REQUEST['start'] * 6);
-		$query_parameters['recycle_board'] = $modSettings['recycle_board'];
+			$query_parameters['max_id_msg'] = max(0, $modSettings['maxMsgID'] - 100 - $_REQUEST['start'] * 6);
+			$query_parameters['recycle_board'] = $modSettings['recycle_board'];
 
-		// !!! This isn't accurate because we ignore the recycle bin.
-		$context['page_index'] = constructPageIndex($scripturl . '?action=recent', $_REQUEST['start'], min(100, $modSettings['totalMessages']), 10, false);
+			// Set up the pageindex
+			require_once(SUBSDIR . '/Boards.subs.php');
+			$context['page_index'] = constructPageIndex($scripturl . '?action=recent', $_REQUEST['start'], min(100, sumRecentPosts()), 10, false);
 ]]></search>
 		<add><![CDATA[
-		// SubForums
-		$query_parameters['max_id_msg'] = max(0, $recent_maxMsgID - 100 - $_REQUEST['start'] * 6);
-		$query_parameters['recycle_board'] = $modSettings['recycle_board'];
+			// SubForums
+			$query_parameters['max_id_msg'] = max(0, $recent_maxMsgID - 100 - $_REQUEST['start'] * 6);
+			$query_parameters['recycle_board'] = $modSettings['recycle_board'];
 
-		// !!! This isn't accurate because we ignore the recycle bin.
-		$context['page_index'] = constructPageIndex($scripturl . '?action=recent', $_REQUEST['start'], min(100, $recent_total_posts), 10, false);
+			// Set up the pageindex
+			require_once(SUBSDIR . '/Boards.subs.php');
+			$context['page_index'] = constructPageIndex($scripturl . '?action=recent', $_REQUEST['start'], min(100, $recent_total_posts), 10, false);
 ]]></add>
 	</operation>
 
-	<operation>
+	<operation error="ignore">
 		<search position="replace"><![CDATA[
 		$request = $db->query('', '
 			SELECT b.id_board
@@ -620,7 +558,7 @@
 ]]></add>
 	</operation>
 
-	<operation>
+	<operation error="ignore">
 		<search position="replace"><![CDATA[
 		$request = $db->query('', '
 			SELECT b.id_board
@@ -650,33 +588,103 @@
 	</operation>
 </file>
 
+
 <file name="CONTROLLERDIR/Stats.controller.php">
 	<operation>
 		<search position="before"><![CDATA[
-			SUM(most_on) AS most_on, MIN(date) AS date, SUM(hits) AS hits
-		FROM {db_prefix}log_activity',
-		array(
-		)
-	);
-	$row = $db->fetch_assoc($result);
-	$db->free_result($request);
+		$averages = getAverages();
 ]]></search>
 		<add><![CDATA[
-	// SubForums
-	if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
-	{
-		$context['num_posts'] = comma_format($modSettings['subforums'][$_SERVER['SERVER_NAME']]['total_posts']);
-		$context['num_topics'] = comma_format($modSettings['subforums'][$_SERVER['SERVER_NAME']]['total_topics']);
-	}
-	else
-	{
-		$context['num_posts'] = comma_format($modSettings['totalMessages']);
-		$context['num_topics'] = comma_format($modSettings['totalTopics']);
-	}
+		// SubForums
+		if(isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]))
+		{
+			$context['num_posts'] = comma_format($modSettings['subforums'][$_SERVER['SERVER_NAME']]['total_posts']);
+			$context['num_topics'] = comma_format($modSettings['subforums'][$_SERVER['SERVER_NAME']]['total_topics']);
+		}
+		else
+		{
+			$context['num_posts'] = comma_format($modSettings['totalMessages']);
+			$context['num_topics'] = comma_format($modSettings['totalTopics']);
+		}
 ]]></add>
 	</operation>
 
 	<operation>
+		<search position="replace"><![CDATA[
+			'total_posts' => comma_format($modSettings['totalMessages']),
+			'total_topics' => comma_format($modSettings['totalTopics']),
+			'total_cats' => comma_format(numCategories()),
+]]></search>
+		<add><![CDATA[
+			// SubForums
+			// 'total_posts' => comma_format($modSettings['totalMessages']),
+			// 'total_topics' => comma_format($modSettings['totalTopics']),
+			'total_cats' => comma_format(numCategories()),
+]]></add>
+	</operation>
+</file>
+
+<file name="SUBSDIR/Stats.subs.php">
+	<operation>
+		<search position="replace"><![CDATA[
+	$result = $db->query('distinct_poll_votes', '
+		SELECT COUNT(DISTINCT id_poll)
+		FROM {db_prefix}log_polls
+		WHERE id_member = {int:current_member}',
+]]></search>
+		<add><![CDATA[
+	// SubForums
+	$result = $db->query('distinct_poll_votes', '
+		SELECT COUNT(DISTINCT id_poll)
+		FROM {db_prefix}log_polls AS p
+			LEFT JOIN {db_prefix}topics as t ON (p.id_poll = t.id_poll)
+		WHERE id_member = {int:current_member}{subforums_see_board:t-id_board}',
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+	$result = $db->query('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}topics
+		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			AND id_board != {int:recycle_board}' : '') . '
+			AND id_poll != {int:no_poll}',
+]]></search>
+		<add><![CDATA[
+	// SubForums
+	$result = $db->query('', '
+		SELECT COUNT(*)
+		FROM {db_prefix}topics
+		WHERE id_member_started = {int:current_member}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
+			AND id_board != {int:recycle_board}' : '') . '
+			AND id_poll != {int:no_poll}{subforums_see_board:id_board}',
+]]></add>
+	</operation>
+
+	<operation>
+		<search position="replace"><![CDATA[
+	$result = $db->query('user_activity_by_time', '
+		SELECT
+			HOUR(FROM_UNIXTIME(poster_time + {int:time_offset})) AS hour,
+			COUNT(*) AS post_count
+		FROM {db_prefix}messages
+		WHERE id_member = {int:current_member}' . ($modSettings['totalMessages'] > 100000 ? '
+			AND id_topic > {int:top_ten_thousand_topics}' : '') . '
+]]></search>
+		<add><![CDATA[
+	// SubForums
+	$result = $db->query('user_activity_by_time', '
+		SELECT
+			HOUR(FROM_UNIXTIME(poster_time + {int:time_offset})) AS hour,
+			COUNT(*) AS post_count
+		FROM {db_prefix}messages
+		WHERE id_member = {int:current_member}' . ($modSettings['totalMessages'] > 100000 ? '
+			AND id_topic > {int:top_ten_thousand_topics}' : '') . '{subforums_see_board:id_board}
+]]></add>
+	</operation>
+
+	<operation error="ignore">
 		<search position="replace"><![CDATA[
 	$result = $db->query('', '
 		SELECT COUNT(*)
@@ -696,7 +704,7 @@
 		<search position="replace"><![CDATA[
 	$result = $db->query('', '
 		SELECT COUNT(*)
-		FROM {db_prefix}categories AS c',
+		FROM {db_prefix}categories',
 		array(
 		)
 	);
@@ -705,24 +713,12 @@
 	// SubForums
 	$result = $db->query('', '
 		SELECT COUNT(*)
-		FROM {db_prefix}categories AS c'. (isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? '
+		FROM {db_prefix}categories'. (isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? '
 		WHERE FIND_IN_SET(c.id_cat, {string:cats}) != 0' : ''),
-		array('cats' => isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? $modSettings['subforums'][$_SERVER['SERVER_NAME']]['cats'] : '')
+		array(
+			'cats' => isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? $modSettings['subforums'][$_SERVER['SERVER_NAME']]['cats'] : ''
+		)
 	);
-]]></add>
-	</operation>
-
-	<operation>
-		<search position="replace"><![CDATA[
-	$context['num_members'] = comma_format($modSettings['totalMembers']);
-	$context['num_posts'] = comma_format($modSettings['totalMessages']);
-	$context['num_topics'] = comma_format($modSettings['totalTopics']);
-	$context['most_members_online'] = array(
-]]></search>
-		<add><![CDATA[
-	// SubForums
-	$context['num_members'] = comma_format($modSettings['totalMembers']);
-	$context['most_members_online'] = array(
 ]]></add>
 	</operation>
 
@@ -733,9 +729,10 @@
 		FROM {db_prefix}members
 		WHERE posts > {int:no_posts}
 		ORDER BY posts DESC
-		LIMIT 10',
+		LIMIT {int:limit_posts}',
 		array(
 			'no_posts' => 0,
+			'limit_posts' => $limit,
 		)
 	);
 ]]></search>
@@ -749,8 +746,12 @@
 			WHERE posts > 0{subforums_see_board:m-id_board}
 			GROUP BY m.id_member, u.real_name
 			ORDER BY posts DESC
-			LIMIT 10',
-			array('guest' => 'Guest')
+			LIMIT {int:limit_posts}',
+			array(
+				'no_posts' => 0,
+				'limit_posts' => $limit,
+				'guest' => $txt['guest_title']
+			)
 		);
 	else
 		$members_result = $db->query('', '
@@ -758,9 +759,10 @@
 			FROM {db_prefix}members
 			WHERE posts > {int:no_posts}
 			ORDER BY posts DESC
-			LIMIT 10',
+			LIMIT {int:limit_posts}',
 			array(
 				'no_posts' => 0,
+				'limit_posts' => $limit,
 				'guest' => $txt['guest_title']
 			)
 		);
@@ -769,36 +771,44 @@
 
 	<operation>
 		<search position="replace"><![CDATA[
-	// Board top 10.
 	$boards_result = $db->query('', '
-		SELECT id_board, name, num_posts
-		FROM {db_prefix}boards AS b
+		SELECT b.id_board, b.name, b.num_posts, b.num_topics' . ($read_status ? ',' . (!$user_info['is_guest'] ? ' 1 AS is_read' : '
+			(IFNULL(lb.id_msg, 0) >= b.id_last_msg) AS is_read') : '') . '
+		FROM {db_prefix}boards AS b' . ($read_status ? '
+			LEFT JOIN {db_prefix}log_boards AS lb ON (lb.id_board = b.id_board AND lb.id_member = {int:current_member})' : '') . '
 		WHERE {query_see_board}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 			AND b.id_board != {int:recycle_board}' : '') . '
 			AND b.redirect = {string:blank_redirect}
 		ORDER BY num_posts DESC
-		LIMIT 10',
+		LIMIT {int:limit_boards}',
 		array(
 			'recycle_board' => $modSettings['recycle_board'],
 			'blank_redirect' => '',
+			'limit_boards' => $limit,
+			'current_member' => $user_info['id'],
 		)
 	);
 ]]></search>
 		<add><![CDATA[
-	// SubForums - Board top 10.
+	// SubForums
 	$boards_result = $db->query('', '
-		SELECT id_board, name, num_posts
-		FROM {db_prefix}boards AS b
+		SELECT b.id_board, b.name, b.num_posts, b.num_topics' . ($read_status ? ',' . (!$user_info['is_guest'] ? ' 1 AS is_read' : '
+			(IFNULL(lb.id_msg, 0) >= b.id_last_msg) AS is_read') : '') . '
+		FROM {db_prefix}boards AS b' . ($read_status ? '
+			LEFT JOIN {db_prefix}log_boards AS lb ON (lb.id_board = b.id_board AND lb.id_member = {int:current_member})' : '') . '
 		WHERE {query_see_board}' . (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
 			AND b.id_board != {int:recycle_board}' : '') . '
 			AND b.redirect = {string:blank_redirect}'. (isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? '
 			AND b.id_cat IN ({array_int:cats})' : '') .'
 		ORDER BY num_posts DESC
-		LIMIT 10',
+		LIMIT {int:limit_boards}',
 		array(
 			'recycle_board' => $modSettings['recycle_board'],
 			'blank_redirect' => '',
-			'cats' => isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? explode(',', $modSettings['subforums'][$_SERVER['SERVER_NAME']]['cats']) : array(),
+			'limit_boards' => $limit,
+			'current_member' => $user_info['id'],
+			'cats' => isset($modSettings['subforums'][$_SERVER['SERVER_NAME']]) ? explode(',', $modSettings['subforums'][$_SERVER['SERVER_NAME']]['cats']) : array(
+			),
 		)
 	);
 ]]></add>

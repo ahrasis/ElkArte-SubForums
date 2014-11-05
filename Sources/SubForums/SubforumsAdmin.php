@@ -21,6 +21,8 @@ if (!defined('ELK'))
 function SubforumsAdmin()
 {
 	global $context, $modSettings, $txt;
+	
+	$db = database();
 
 	if(isset($_GET['action']) && $_GET['action'] == 'admin' && isset($_GET['area']) && $_GET['area'] == 'subforums')
 	{
@@ -298,6 +300,8 @@ function SubforumsAdmin()
 function SubForums_ClearCache()
 {
 	global $modSettings, $boardurl, $base_boardurl;
+	
+	$db = database();
 
 	$org_url = $boardurl;
 	$boardurl = $base_boardurl;

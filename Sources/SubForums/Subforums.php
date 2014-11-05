@@ -135,7 +135,7 @@ function Subforums_GetContext()
 	if(!empty($modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']))
 	{
 		$context['forum_name'] = $modSettings['subforums'][$_SERVER['SERVER_NAME']]['name'];
-		$context['forum_name_html_safe'] = $db->htmlspecialchars($modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']);
+		$context['forum_name_html_safe'] = Utils::htmlspecialchars($modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']);
 	}
 }
 
@@ -176,6 +176,8 @@ function Subforums_checkurl($url)
 function Subforums_updStats($change)
 {
 	global $modSettings;
+	
+	$db = database();
 
 	if(array_key_exists($_SERVER['SERVER_NAME'], $modSettings['subforums']))
 	{
@@ -329,6 +331,8 @@ function Subforums_checkhost($itemData, &$bits)
 function Subforums_LoadSettings()
 {
 	global $modSettings, $language, $txt;
+	
+	$db = database();
 
 	// check if cached ..
 	if(empty($modSettings['cache_enable']) || ($modSettings['subforums'] = cache_get_data('PMx-SubForums-', 10)) === null)
@@ -386,6 +390,8 @@ function Subforums_LoadSettings()
 function Subforums_Login($adm_mode)
 {
 	global context, $user_info, $user_profile;
+	
+	$db = database();
 
 	// save the current url for login
 	$_SESSION['login_url'] = htmlspecialchars__recursive($_SERVER['QUERY_STRING']);
