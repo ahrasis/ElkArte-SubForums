@@ -1,14 +1,23 @@
 <?php
-/******************************
-* file dbinstall.php          *
-* Database tables install     *
-* Coypright by PortaMx corp.  *
-*******************************/
+/**
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
 
 global $db_prefix, $user_info, $boardurl, $boarddir, $sourcedir, $txt, $dbinstall_string;
+	
+$db = database();
 
 // Load the SSI.php
-if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
+if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('ELK'))
 {
 	function _dbinst_write($string) { echo $string; }
 
@@ -30,9 +39,9 @@ if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
 		}
 	}
 }
-// no SSI.php and no SMF?
-elseif (!defined('SMF'))
-	die('<b>Error:</b> SSI.php not found. Please verify you put this in the same place as SMF\'s index.php.');
+// no SSI.php and no ELK?
+elseif (!defined('ELK'))
+	die('<b>Error:</b> SSI.php not found. Please verify you put this in the same place as ElkArte\'s index.php.');
 else
 {
 	function _dbinst_write($string)
@@ -49,10 +58,11 @@ if(!empty($pref[1]))
 else
 	$pref = $db_prefix;
 
-// Load the SMF DB Functions
-db_extend('packages');
-db_extend('extra');
-
+// Load the ELK DB Functions
+if (ELK == 'SSI') {
+	db_extend('packages');
+	db_extend('extra');
+}
 /********************
 * Define the tables *
 *********************/
@@ -93,14 +103,14 @@ foreach($tabledate as $tblname => $tbldef)
 	_dbinst_write($newline .'Processing Table "'. $pref . $tblname .'".<br />');
 	$newline = '<br />';
 	$exist = false;
-	$tablelist = $smcFunc['db_list_tables'](false, $pref. $tblname);
+	$tablelist = $db->list_tables(false, $pref. $tblname);
 	if(!empty($tablelist) && in_array($pref . $tblname, $tablelist))
 	{
 		// exist .. check the cols, the type and value
 		_dbinst_write('.. Table exist, checking columns and indexes.<br />');
 		$exist = true;
 		list($cols, $index, $params) = $tbldef;
-		$structure = $smcFunc['db_table_structure']('{db_prefix}'. $tblname, true);
+		$structure = $db->table_structure('{db_prefix}'. $tblname, true);
 
 		$drop = check_columns($cols, $structure['columns']);
 		if(empty($drop))
@@ -112,13 +122,13 @@ foreach($tabledate as $tblname => $tbldef)
 
 	if(!empty($drop))
 	{
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 				SELECT id, forum_host, forum_name, cat_order, id_theme, acs_groups
 				FROM {db_prefix}subforums
 				ORDER BY id',
 			array()
 		);
-		while($row = $smcFunc['db_fetch_assoc']($request))
+		while($row = $db->fetch_assoc($request))
 			$updconvert[] = array(
 				'id' => $row['id'],
 				'host' => $row['forum_host'],
@@ -129,10 +139,10 @@ foreach($tabledate as $tblname => $tbldef)
 				'groups' => $row['acs_groups'],
 				'reg_group' => -1,
 			);
-		$smcFunc['db_free_result']($request);
+		$db->free_result($request);
 
 		// drop table
-		$smcFunc['db_drop_table']('{db_prefix}'. $tblname);
+		$db->drop_table('{db_prefix}'. $tblname);
 		$exist = false;
 		_dbinst_write('.. Table not identical, dropped.<br />');
 	}
@@ -142,7 +152,7 @@ foreach($tabledate as $tblname => $tbldef)
 		// create the table
 		$created[] = $tblname;
 		list($cols, $index, $params) = $tbldef;
-		$smcFunc['db_create_table']('{db_prefix}'. $tblname, $cols, $index, $params, 'error');
+		$db->create_table('{db_prefix}'. $tblname, $cols, $index, $params, 'error');
 		_dbinst_write('.. Table successful created.<br />');
 
 		if(!empty($updconvert))
@@ -150,18 +160,18 @@ foreach($tabledate as $tblname => $tbldef)
 			foreach($updconvert as $i => $data)
 			{
 				// get Messages and Topics
-				$result = $smcFunc['db_query']('', '
+				$result = $db->query('', '
 					SELECT SUM(num_posts + unapproved_posts) AS total_posts, SUM(num_topics + unapproved_topics) AS total_topics
 					FROM {db_prefix}boards
 					WHERE id_cat IN ('. $data['cats'] .')',
 					array()
 				);
-				$row = $smcFunc['db_fetch_assoc']($result);
+				$row = $db->fetch_assoc($result);
 				$posts = empty($row['total_posts']) ? 0 : $row['total_posts'];
 				$topics = empty($row['total_topics']) ? 0 : $row['total_topics'];
-				$smcFunc['db_free_result']($result);
+				$db->free_result($result);
 
-				$smcFunc['db_insert']('', '
+				$db->insert('', '
 					{db_prefix}subforums',
 					array(
 						'forum_host' => 'string',
@@ -205,33 +215,33 @@ if(!empty($dbupdates))
 {
 	$found = array();
 	// get last exist version
-	$request = $smcFunc['db_query']('', '
+	$request = $db->query('', '
 		SELECT id_install, themes_installed
 		FROM {db_prefix}log_packages
 		WHERE package_id LIKE {string:pkgid} AND version LIKE {string:vers}
 		ORDER BY id_install DESC
 		LIMIT 1',
 		array(
-			'pkgid' => 'portamx_corp:SubForums%',
+			'pkgid' => 'ahrasis:SubForums%',
 			'vers' => '1.%',
 		)
 	);
-	while($row = $smcFunc['db_fetch_assoc']($request))
+	while($row = $db->fetch_assoc($request))
 	{
 		$found['id'] = $row['id_install'];
 		$found['themes'] = $row['themes_installed'];
 	}
-	$smcFunc['db_free_result']($request);
+	$db->free_result($request);
 
 	if(!empty($found['id']))
 	{
-		$smcFunc['db_query']('', '
+		$db->query('', '
 			UPDATE {db_prefix}log_packages
 			SET package_id = {string:pkgid}, db_changes = {string:dbchg},'. (!empty($found['themes']) ? ' themes_installed = {string:thchg},' : '') .' install_state = 1
 			WHERE id_install = {int:id}',
 			array(
 				'id' => $found['id'],
-				'pkgid' => 'portamx_corp:SubForums',
+				'pkgid' => 'ahrasis:SubForums',
 				'thchg' => (!empty($found['themes']) ? $found['themes'] : ''),
 				'dbchg' => serialize($dbupdates),
 			)
@@ -243,7 +253,7 @@ if(!empty($dbupdates))
 _dbinst_write('<br />Setup integration functions.<br />');
 
 $hooklist = array(
-	'integrate_pre_include' => '$sourcedir/SubForums/Subforums.php',
+	'integrate_pre_include' => 'SOURCEDIR/addons/SubForums/Subforums.php',
 	'integrate_admin_areas' => 'Subforums_AdminMenu',
 	'integrate_register' => 'Subforums_Register',
 );
@@ -252,66 +262,37 @@ foreach($hooklist as $hook => $value)
 	remove_integration_function($hook, $value);
 
 // get the hooks from database
-$smfhooks = array();
-$request = $smcFunc['db_query']('', '
+$hook = array();
+$request = $db->query('', '
 	SELECT variable, value FROM {db_prefix}settings
 	WHERE variable IN ({array_string:hooks})',
 	array('hooks' => array_keys($hooklist))
 );
-if($smcFunc['db_num_rows']($request) > 0)
+if($db->num_rows($request) > 0)
 {
-	while($row = $smcFunc['db_fetch_assoc']($request))
-		$smfhooks[$row['variable']] = $row['value'];
-	$smcFunc['db_free_result']($request);
+	while($row = $db->fetch_assoc($request))
+		$hook[$row['variable']] = $row['value'];
+	$db->free_result($request);
 }
 
 // update the hooks
 foreach($hooklist as $hookname => $value)
 {
-	if(isset($smfhooks[$hookname]))
-		$smfhooks[$hookname] = trim($hooklist[$hookname] .','. trim(str_replace($value, '', $smfhooks[$hookname]), ','), ',');
+	if(isset($hook[$hookname]))
+		$hook[$hookname] = trim($hooklist[$hookname] .','. trim(str_replace($value, '', $hook[$hookname]), ','), ',');
 	else
-		$smfhooks[$hookname] = trim($value);
+		$hook[$hookname] = trim($value);
 
-	$smcFunc['db_insert']('replace', '
+	$db->insert('replace', '
 		{db_prefix}settings',
 		array('variable' => 'string', 'value' => 'string'),
-		array($hookname, $smfhooks[$hookname]),
+		array($hookname, $hook[$hookname]),
 		array()
 	);
 }
 
 // clear the cache
 cache_put_data('modSettings', NULL, 90);
-
-_dbinst_write('Setup PortaMx package server.<br />');
-
-// setup Portamx package server
-$request = $smcFunc['db_query']('', '
-	SELECT id_server
-	FROM {db_prefix}package_servers
-	WHERE url = {string:url}',
-	array(
-		'url' => 'http://docserver.portamx.com'
-	)
-);
-if($row = $smcFunc['db_fetch_assoc']($request))
-	$smcFunc['db_free_result']($request);
-else
-{
-	$smcFunc['db_insert']('', '
-		{db_prefix}package_servers',
-		array(
-			'name' => 'string',
-			'url' => 'string'
-		),
-		array(
-			'PortaMx File Server',
-			'http://docserver.portamx.com'
-		),
-		array('id_server')
-	);
-}
 
 // done
 if(!empty($dbinstall_string))

@@ -1,12 +1,18 @@
 <?php
 /**
-* Subforums.php
-*
-* Software Version: SMF Subforums v1.41
-* Software by: PortaMx corp.
-**/
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
 
-if (!defined('SMF'))
+if (!defined('ELK'))
 	die('Hacking attempt...');
 
 /**
@@ -124,12 +130,12 @@ function Subforums_LoadTheme($themeID)
 **/
 function Subforums_GetContext()
 {
-	global $context, $modSettings, $smcFunc;
+	global $context, $modSettings;
 
 	if(!empty($modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']))
 	{
 		$context['forum_name'] = $modSettings['subforums'][$_SERVER['SERVER_NAME']]['name'];
-		$context['forum_name_html_safe'] = $smcFunc['htmlspecialchars']($modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']);
+		$context['forum_name_html_safe'] = Utils::htmlspecialchars($modSettings['subforums'][$_SERVER['SERVER_NAME']]['name']);
 	}
 }
 
@@ -169,7 +175,9 @@ function Subforums_checkurl($url)
 **/
 function Subforums_updStats($change)
 {
-	global $modSettings, $smcFunc;
+	global $modSettings;
+	
+	$db = database();
 
 	if(array_key_exists($_SERVER['SERVER_NAME'], $modSettings['subforums']))
 	{
@@ -181,7 +189,7 @@ function Subforums_updStats($change)
 			{
 				// Get the number of messages / topics
 				$col = str_replace('total', '', $variable);
-				$result = $smcFunc['db_query']('', '
+				$result = $db->query('', '
 					SELECT SUM(num'. $col .' + unapproved'. $col .') AS total'. $col .'
 					FROM {db_prefix}boards
 					WHERE redirect = {string:blank_redirect} AND id_cat IN ({raw:cats})'. (!empty($modSettings['recycle_enable']) && $modSettings['recycle_board'] > 0 ? '
@@ -192,14 +200,14 @@ function Subforums_updStats($change)
 						'blank_redirect' => '',
 					)
 				);
-				$row = $smcFunc['db_fetch_assoc']($result);
-				$smcFunc['db_free_result']($result);
+				$row = $db->fetch_assoc($result);
+				$db->free_result($result);
 				$change[$variable] = $row[$variable] === null ? 0 : $row[$variable];
 			}
 
 			foreach($change as $variable => $value)
 			{
-				$smcFunc['db_query']('', '
+				$db->query('', '
 					UPDATE {db_prefix}subforums
 					SET {raw:variable} = {'. ($value === false || $value === true ? 'raw' : 'int') . ':value}
 					WHERE forum_host = {string:host}',
@@ -322,23 +330,25 @@ function Subforums_checkhost($itemData, &$bits)
 **/
 function Subforums_LoadSettings()
 {
-	global $modSettings, $smcFunc, $language, $txt;
+	global $modSettings, $language, $txt;
+	
+	$db = database();
 
 	// check if cached ..
 	if(empty($modSettings['cache_enable']) || ($modSettings['subforums'] = cache_get_data('PMx-SubForums-', 10)) === null)
 	{
 		// not cached .. get from database
 		$modSettings['subforums'] = array();
-		$request = $smcFunc['db_query']('', '
+		$request = $db->query('', '
 			SELECT s.id, s.forum_host, s.forum_name, s.cat_order, s.id_theme, s.language, s.acs_groups, s.reg_group, s.total_posts, s.total_topics, b.id_board
 			FROM {db_prefix}subforums AS s
 			LEFT JOIN {db_prefix}boards as b ON (FIND_IN_SET(b.id_cat, s.cat_order) > 0)
 			ORDER BY b.id_cat, b.id_board',
 			array()
 		);
-		if($smcFunc['db_num_rows']($request) > 0)
+		if($db->num_rows($request) > 0)
 		{
-			while($row = $smcFunc['db_fetch_assoc']($request))
+			while($row = $db->fetch_assoc($request))
 			{
 				if(!isset($modSettings['subforums'][$row['forum_host']]['cats']))
 				{
@@ -354,7 +364,7 @@ function Subforums_LoadSettings()
 				}
 				$modSettings['subforums'][$row['forum_host']]['boards'][] = $row['id_board'];
 			}
-			$smcFunc['db_free_result']($request);
+			$db->free_result($request);
 
 			// convert board
 			foreach($modSettings['subforums'] as $host => $d)
@@ -371,7 +381,7 @@ function Subforums_LoadSettings()
 		$language = $modSettings['subforums'][$_SERVER['SERVER_NAME']]['language'];
 
 	// load language
-	loadLanguage('SubForums/Subforums');
+	loadLanguage('addons/SubForums/Subforums');
 }
 
 /**
@@ -379,12 +389,14 @@ function Subforums_LoadSettings()
 **/
 function Subforums_Login($adm_mode)
 {
-	global $sourcedir, $context, $user_info, $user_profile, $smcFunc;
+	global context, $user_info, $user_profile;
+	
+	$db = database();
 
 	// save the current url for login
 	$_SESSION['login_url'] = htmlspecialchars__recursive($_SERVER['QUERY_STRING']);
 
-	require_once($sourcedir . '/Subs-Auth.php');
+	require_once(SUBSDIR . '/Auth.subs.php');
 
 	// normal login ?
 	if(empty($adm_mode) && empty($_REQUEST['action']) && empty($_REQUEST['board']) && empty($_REQUEST['topic']))
@@ -427,7 +439,7 @@ function Subforums_Login($adm_mode)
 
 						// get permissions for the group(s)
 						$perms = 0;
-						$request = $smcFunc['db_query']('', '
+						$request = $db->query('', '
 							SELECT count(permission)
 							FROM {db_prefix}permissions
 							WHERE id_group IN ({array_int:group}) AND permission = {string:perm} AND add_deny = 1',
@@ -436,8 +448,8 @@ function Subforums_Login($adm_mode)
 								'perm' => 'admin_forum'
 							)
 						);
-						list($perms) = $smcFunc['db_fetch_row']($request);
-						$smcFunc['db_free_result']($request);
+						list($perms) = $db->fetch_row($request);
+						$db->free_result($request);
 
 						// no permissions and not group 1 .. failed admin login
 						if(empty($perms) && !in_array(1, $groups))
@@ -472,14 +484,12 @@ function Subforums_Login($adm_mode)
 **/
 function Subforums_noAccess($url, $subfName)
 {
-	global $sourcedir;
-
 	if(!empty($url))
 		$_SESSION['logout_url'] = $url;
 
 	$_REQUEST = $_GET = array('action' => 'logout');
 
-	require_once($sourcedir . '/LogInOut.php');
+	require_once(CONTROLLERDIR . '/Auth.controller.php');
 	Logout(true, false);
 
 	// show a error message
@@ -511,9 +521,9 @@ function Subforums_AdminMenu(&$menudata)
 		array(
 				'subforums' => array(
 					'label' => $txt['admin_subforums'],
-					'file' => 'SubForums/SubforumsAdmin.php',
+					'file' => 'addons/SubForums/SubforumsAdmin.php',
 					'function' => 'SubforumsAdmin',
-					'icon' => 'subforums.gif',
+					'icon' => 'addons/SubForums/subforums.gif',
 					'subsections' => array(
 					),
 				),

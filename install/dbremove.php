@@ -1,14 +1,21 @@
 <?php
-/****************************** 
-* file dbremove.php           *
-* Database tables remove      *
-* Coypright by PortaMx corp.  *
-*******************************/
+/**
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
 
 global $db_prefix, $user_info, $boardurl, $txt;
 
 // Load the SSI.php
-if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
+if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('ELK'))
 {
 	function _write($string) { echo $string; }
 
@@ -30,9 +37,9 @@ if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
 		}
 	}
 }
-// no SSI.php and no SMF?
-elseif (!defined('SMF'))
-	die('<b>Error:</b> SSI.php not found. Please verify you put this in the same place as SMF\'s index.php.');
+// no SSI.php and no ELK?
+elseif (!defined('ELK'))
+	die('<b>Error:</b> SSI.php not found. Please verify you put this in the same place as ElkArte\'s index.php.');
 else
 {
 	function _write($string) { return; };
@@ -45,9 +52,11 @@ if(!empty($pref[1]))
 else
 	$pref = $db_prefix;
 
-// Load the SMF DB Functions
-db_extend('packages');
-db_extend('extra');
+// Load the ELK DB Functions
+if (ELK == 'SSI') {
+	db_extend('packages');
+	db_extend('extra');
+}
 
 /********************
 * Define the tables *                      
@@ -61,11 +70,11 @@ foreach($tabledate as $tblname)
 {
 	// check if the table exist
 	_write('Processing Table "'. $pref . $tblname .'".<br />');
-	$tablelist = $smcFunc['db_list_tables'](false, $pref. $tblname);
+	$tablelist = $db->list_table(false, $pref. $tblname);
 	if(!empty($tablelist) && in_array($pref . $tblname, $tablelist))
 	{
 		// drop table
-		$smcFunc['db_drop_table']('{db_prefix}'. $tblname);
+		$db->drop_table('{db_prefix}'. $tblname);
 		_write('.. Table "'. $pref . $tblname .'" successful dropped.<br /><br />');
 	}
 	else

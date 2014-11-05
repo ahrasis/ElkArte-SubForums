@@ -1,12 +1,18 @@
 <?php
 /**
-* Subforums-DB.php
-*
-* Software Version: SMF Subforums v1.41
-* Software by: PortaMx corp.
-**/
+ *
+ * This software is a derived product, based on:
+ * @name     	PortaMX-SubForums
+ * @copyright	PortaMx Corp. http://portamx.com (SMF Version)
+ *
+ * This software is converted to ElkArte:
+ * @convertor  	ahrasis http://elkarte.ahrasis.com (ElkArte Version)
+ * @license 	BSD http://opensource.org/licenses/BSD-3-Clause
+ * @name     	SFA: Sub Forums Addon
+ *
+ */
 
-if (!defined('SMF'))
+if (!defined('ELK'))
 	die('Hacking attempt...');
 
 // check the db sting for Subforums
